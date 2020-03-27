@@ -83,7 +83,10 @@ public:
         printer.Emit(variable_->Get(), variable_path_, dest);
     }
 
-    virtual const std::string& Path() const override { return variable_path_; }
+    virtual const std::string& Path() const override
+    {
+        return variable_path_;
+    }
 
 private:
     std::string variable_path_;
@@ -153,7 +156,10 @@ public:
         }
     }
 
-    virtual const std::string& Path() const override { return section_path_; }
+    virtual const std::string& Path() const override
+    {
+        return section_path_;
+    }
 
 private:
     std::string section_path_;
@@ -218,7 +224,10 @@ public:
         }
     }
 
-    virtual const std::string& Path() const override { return vector_path_; }
+    virtual const std::string& Path() const override
+    {
+        return vector_path_;
+    }
 
 private:
     std::string vector_path_;

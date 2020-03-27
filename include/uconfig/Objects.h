@@ -73,13 +73,25 @@ public:
         return *value_;
     }
 
-    bool Initialized() const { return value_ != boost::none; }
+    bool Initialized() const
+    {
+        return value_ != boost::none;
+    }
 
-    operator const T&() const { return Get(); }
+    operator const T&() const
+    {
+        return Get();
+    }
 
-    const T& operator*() const { return Get(); }
+    const T& operator*() const
+    {
+        return Get();
+    }
 
-    const T* operator->() const { return &Get(); }
+    const T* operator->() const
+    {
+        return &Get();
+    }
 
 protected:
     boost::optional<T> value_;
@@ -236,9 +248,15 @@ public:
 
     virtual void Init(const std::string& parse_path) = 0;
 
-    virtual bool Initialized() const { return initialized_; }
+    virtual bool Initialized() const
+    {
+        return initialized_;
+    }
 
-    virtual bool Optional() const { return optional_; }
+    virtual bool Optional() const
+    {
+        return optional_;
+    }
 
 protected:
     template <typename T>
@@ -273,7 +291,10 @@ public:
         return result;
     }
 
-    bool Initialized() const { return true; }
+    bool Initialized() const
+    {
+        return true;
+    }
 };
 
 } // namespace uconfig
