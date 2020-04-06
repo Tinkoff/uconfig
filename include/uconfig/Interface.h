@@ -69,8 +69,12 @@ public:
         boost::optional<T> result_opt = parser.template Parse<T>(source, variable_path_);
 
         if (!result_opt) {
-            if (!variable_->Initialized()) {
-                throw ParseError(Format::name + " " + variable_path_ + " is not set");
+            try {
+                if (!variable_->Initialized()) {
+                    throw ParseError(Format::name + " " + variable_path_ + " is invalid");
+                }
+            } catch (const std::exception& e) {
+                throw ParseError(Format::name + " " + variable_path_ + " is invalid: " + e.what());
             }
             return false;
         }
@@ -145,8 +149,12 @@ public:
 
     virtual void Emit(format_type& printer, dest_type* dest) const override
     {
-        if (!section_->Initialized()) {
-            return;
+        try {
+            if (!section_->Initialized()) {
+                return;
+            }
+        } catch (const std::exception& e) {
+            throw ParseError(Format::name + " " + section_path_ + " is invalid: " + e.what());
         }
 
         section_->interfaces_.clear();
