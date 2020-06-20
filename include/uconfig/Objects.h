@@ -258,6 +258,8 @@ public:
         return optional_;
     }
 
+    virtual void FillFields() {}
+
 protected:
     template <typename T>
     void Register(const std::string& parse_path, T* element)

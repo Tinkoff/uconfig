@@ -143,6 +143,8 @@ public:
             }
         }
 
+        section_->FillFields();
+
         section_->initialized_ = fullset;
         return parsed_;
     }
