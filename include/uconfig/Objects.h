@@ -258,6 +258,8 @@ public:
         return optional_;
     }
 
+    virtual void PostParse() const {}
+
 protected:
     template <typename T>
     void Register(const std::string& parse_path, T* element)
@@ -295,6 +297,8 @@ public:
     {
         return true;
     }
+
+    virtual void PostParse() const {}
 };
 
 } // namespace uconfig

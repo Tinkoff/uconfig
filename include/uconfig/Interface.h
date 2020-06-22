@@ -143,6 +143,8 @@ public:
             }
         }
 
+        section_->PostParse();
+
         section_->initialized_ = fullset;
         return parsed_;
     }
@@ -219,6 +221,9 @@ public:
             ++index;
             element_vector_->emplace_back(std::move(element));
         }
+
+        element_vector_->PostParse();
+
         return index > 0;
     }
 
