@@ -258,7 +258,7 @@ public:
         return optional_;
     }
 
-    virtual void FillFields() {}
+    virtual void PostParse() const {}
 
 protected:
     template <typename T>
@@ -297,6 +297,8 @@ public:
     {
         return true;
     }
+
+    virtual void PostParse() const {}
 };
 
 } // namespace uconfig
