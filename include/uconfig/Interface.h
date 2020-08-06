@@ -71,7 +71,7 @@ public:
         if (!result_opt) {
             try {
                 if (!variable_->Initialized()) {
-                    throw ParseError(Format::name + " " + variable_path_ + " is invalid");
+                    throw ParseError("variable is not set");
                 }
             } catch (const std::exception& e) {
                 throw ParseError(Format::name + " " + variable_path_ + " is invalid: " + e.what());
