@@ -35,9 +35,10 @@ public:
     using dest_type = typename format_type::dest_type;
 
     virtual ~Interface() = default;
-    virtual bool Parse(format_type& parser, const source_type* source) = 0;
+    virtual bool Parse(format_type& parser, const source_type* source, bool stop_on_fail=true) = 0;
     virtual void Emit(format_type& printer, dest_type* dest) const = 0;
     virtual const std::string& Path() const = 0;
+    virtual bool Initialized() const = 0;
 };
 
 template <typename T, typename Format>
@@ -64,7 +65,7 @@ public:
 
     virtual ~VariableIface() = default;
 
-    virtual bool Parse(format_type& parser, const source_type* source) override
+    virtual bool Parse(format_type& parser, const source_type* source, bool stop_on_fail=true) override
     {
         boost::optional<T> result_opt = parser.template Parse<T>(source, variable_path_);
 
@@ -74,6 +75,7 @@ public:
                     throw ParseError("variable is not set");
                 }
             } catch (const std::exception& e) {
+                // always trows on fail to notify that mandatory variable was not parsed
                 throw ParseError(Format::name + " " + variable_path_ + " is invalid: " + e.what());
             }
             return false;
@@ -90,6 +92,11 @@ public:
     virtual const std::string& Path() const override
     {
         return variable_path_;
+    }
+
+    virtual bool Initialized() const override
+    {
+        return variable_->Initialized();
     }
 
 private:
@@ -121,32 +128,32 @@ public:
 
     virtual ~SectionIface() = default;
 
-    virtual bool Parse(format_type& parser, const source_type* source) override
+    virtual bool Parse(format_type& parser, const source_type* source, bool stop_on_fail=true) override
     {
-        bool parsed_ = false;
-        bool fullset = true;
+        bool mandatory_set = true;
+        bool section_parsed = false;
 
         section_->interfaces_.clear();
         section_->Init(section_path_);
         for (auto& iface : section_->interfaces_) {
+            bool iface_parsed;
             try {
-                // at least one of section's interfaces should be parsed
-                parsed_ |= iface->Parse(parser, source);
+                iface_parsed = iface->Parse(parser, source, stop_on_fail);
             } catch (const ParseError&) {
-                // Parse() will throw if variable is not set (i.e. boost::none)
-                if (section_->Optional()) {
-                    // if section is optional, it is not initialized
-                    fullset = false;
-                } else {
+                mandatory_set = false;
+                iface_parsed = false;
+                if (!section_->Optional() && stop_on_fail) {
                     throw;
                 }
             }
+
+            // section considered parsed if at least one of its' interfaces parsed
+            section_parsed |= iface_parsed;
         }
-
+        // section considered initialized if parsed and all mandatory has been set
+        section_->initialized_ = section_parsed && mandatory_set;
         section_->PostParse();
-
-        section_->initialized_ = fullset;
-        return parsed_;
+        return section_parsed;
     }
 
     virtual void Emit(format_type& printer, dest_type* dest) const override
@@ -169,6 +176,11 @@ public:
     virtual const std::string& Path() const override
     {
         return section_path_;
+    }
+
+    virtual bool Initialized() const override
+    {
+        return section_->Initialized();
     }
 
 private:
@@ -200,21 +212,23 @@ public:
 
     virtual ~VectorIface() = default;
 
-    virtual bool Parse(format_type& parser, const source_type* source) override
+    virtual bool Parse(format_type& parser, const source_type* source, bool stop_on_fail=true) override
     {
         using iface_type = typename T::template iface_type<Format>;
 
         std::size_t index = 0;
         while (true) {
             T element;
-            bool parsed = false;
+            bool parsed;
 
             iface_type iface(parser.VectorElementPath(vector_path_, index), &element);
             try {
-                parsed = iface.Parse(parser, source);
+                parsed = iface.Parse(parser, source, stop_on_fail);
             } catch (const ParseError&) {
+                parsed = false;
             }
-            if (!parsed) {
+            // always stops on fail to prevent looping
+            if (!parsed || !iface.Initialized()) {
                 break;
             }
 
@@ -223,7 +237,6 @@ public:
         }
 
         element_vector_->PostParse();
-
         return index > 0;
     }
 
@@ -240,6 +253,11 @@ public:
     virtual const std::string& Path() const override
     {
         return vector_path_;
+    }
+
+    virtual bool Initialized() const override
+    {
+        return element_vector_->Initialized();
     }
 
 private:
