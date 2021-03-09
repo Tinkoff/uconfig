@@ -101,17 +101,6 @@ public:
               bool throw_on_fail = true);
 
     /**
-     * Initialize config before parsing.
-     * This function get called within Parse() and expected to register all variables
-     *  in the config with respected paths. To register a variable call Register().
-     *
-     * @param[in] config_path Path of this config for the Format.
-     *
-     * @returns true if it has, false otherwise.
-     */
-    virtual void Init(const std::string& config_path) = 0;
-
-    /**
      * Check if config has all mandatory values.
      *
      * @returns true if it has, false otherwise.
@@ -126,6 +115,17 @@ public:
     virtual bool Optional() const noexcept override;
 
 protected:
+    /**
+     * Initialize config before parsing.
+     * This function get called within Parse() and expected to register all variables
+     *  in the config with respected paths. To register a variable call Register().
+     *
+     * @param[in] config_path Path of this config for the Format.
+     *
+     * @returns true if it has, false otherwise.
+     */
+    virtual void Init(const std::string& config_path) = 0;
+
     /**
      * Register a child for this config.
      * This function should be called for all children of the config to get them parsed/emitted.
