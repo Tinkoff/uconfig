@@ -6,15 +6,15 @@
 C++ header-only library to parse and emit **multi-format** configuration for your app. For example, you can parse JSON-file into the config and then compliment it from environment variables.
 
 Supported types:
-* plain variables (`int`, `double`, `std::string etc`);
+* plain variables (`int`, `double`, `std::string` etc);
 * vectors of variables or configs;
-* another configurations.
+* nested configs.
 
 Supported formats:
 * [Rapidjson](https://rapidjson.org/) – parse and emit `rapidjson::Value`
 * Env – parse values from environment, emit to `std::map<std::string, std::string>`
 
-Library allows to implement custom formats as well as custom types.
+Library allows to implement [custom formats](#custom-formats) as well as [custom types](#custom-types).
 
 ## Quickstart
 
@@ -35,8 +35,8 @@ struct LogConfig: public uconfig::Config<uconfig::EnvFormat>
     // Define naming scheme for variables
     virtual void Init(const std::string& config_path) override
     {
-        Register(config_path + "_FILE", &file);
-        Register(config_path + "_ROTATE_MB", &rotate_mb);
+        Register<uconfig::EnvFormat>(config_path + "_FILE", &file);
+        Register<uconfig::EnvFormat>(config_path + "_ROTATE_MB", &rotate_mb);
     }
 };
 
@@ -49,8 +49,8 @@ struct NodeConfig: public uconfig::Config<uconfig::EnvFormat>
 
     virtual void Init(const std::string& config_path) override
     {
-        Register(config_path + "_HOST", &int_var);
-        Register(config_path + "_PORT", &optional_int_var);
+        Register<uconfig::EnvFormat>(config_path + "_HOST", &int_var);
+        Register<uconfig::EnvFormat>(config_path + "_PORT", &optional_int_var);
     }
 };
 
@@ -65,10 +65,10 @@ struct AppConfig: public uconfig::Config<uconfig::EnvFormat>
 
     virtual void Init(const std::string& config_path) override
     {
-        Register(config_path + "_LOG", &log_config);
-        Register(config_path + "_TIMEOUT_MS", &timeout_ms);
-        Register(config_path + "_NODE", &nodes);
-        Register(config_path + "_ENDPOINT", &endpoints);
+        Register<uconfig::EnvFormat>(config_path + "_LOG", &log_config);
+        Register<uconfig::EnvFormat>(config_path + "_TIMEOUT_MS", &timeout_ms);
+        Register<uconfig::EnvFormat>(config_path + "_NODE", &nodes);
+        Register<uconfig::EnvFormat>(config_path + "_ENDPOINT", &endpoints);
     }
 };
 ```
@@ -96,10 +96,142 @@ JSON formatter uses [JSON-pointer](https://tools.ietf.org/html/rfc6901) as names
 
 ## Detailed description
 
+### Nested variable names
+
+Full name for the variable formed by nested calls of `void Config<>::Init(const std::string& config_path)` with parent name passed as `config_path`.
+By design variables naming scheme is arbitrary, meaning you are free to call `Register()` with whatever string you want. But if format supports hierarchy, names should respect it and represent some hierarchical paths.
+
+For example, JSON-objects have hierarchy, so `uconfig::RapidjsonFormat` uses JSON-pointer for variable names, so
+```c++
+Register<uconfig::RapidjsonFormat>("/a/b/c", &variable);
+```
+would tell to lookup for `variable` as the member "c" of the object "b" of the object "a":
+```
+{
+    "a" : {
+        "b" : {
+            "c" : 123
+        }
+    }
+}
+```
+
+This allows to have **single global config** and not lose its' hierarchy for supported formats:
+```c++
+struct GlobalConfig: public uconfig::Config<uconfig::EnvFormat, uconfig::RapidjsonFormat<>>
+{
+    uconfig::Variable<std::string> log_file;
+    uconfig::Variable<unsigned> log_rotate_mb;
+    uconfig::Variable<std::string> upsteam_url;
+    uconfig::Variable<unsigned> upsteam_timeout_ms{100};
+    uconfig::Variable<std::string> server_host;
+    uconfig::Variable<unsigned> server_port;
+
+    using uconfig::Config<uconfig::EnvFormat, uconfig::RapidjsonFormat<>>::Config;
+
+    virtual void Init(const std::string&) override
+    {
+        // register with names
+        Register<uconfig::EnvFormat>("CFG_LOG_FILE", &log_file);
+        Register<uconfig::EnvFormat>("CFG_LOG_ROTATE_MB", &log_rotate_mb);
+        Register<uconfig::EnvFormat>("CFG_UPSTEAM_URL", &upsteam_url);
+        Register<uconfig::EnvFormat>("CFG_UPSTEAM_TIMEOUT_MS", &upsteam_timeout_ms);
+        Register<uconfig::EnvFormat>("CFG_SERVER_HOST", &server_host);
+        Register<uconfig::EnvFormat>("CFG_SERVER_PORT", &server_port);
+        // register with json-pointers
+        Register<uconfig::RapidjsonFormat<>>("/log/file", &log_file);
+        Register<uconfig::RapidjsonFormat<>>("/log/rotate_mb", &log_rotate_mb);
+        Register<uconfig::RapidjsonFormat<>>("/upsteam/url", &upsteam_url);
+        Register<uconfig::RapidjsonFormat<>>("/upsteam/timeout_ms", &upsteam_timeout_ms);
+        Register<uconfig::RapidjsonFormat<>>("/server/host", &server_host);
+        Register<uconfig::RapidjsonFormat<>>("/server/port", &server_port);
+    }
+};
+```
+
+Or to make **separate configs** and include them into `GlobalConfig`:
+
+```c++
+struct LogConfig: public uconfig::Config<uconfig::EnvFormat, uconfig::RapidjsonFormat<>>
+{
+    uconfig::Variable<std::string> file;
+    uconfig::Variable<unsigned> rotate_mb;
+
+    using uconfig::Config<uconfig::EnvFormat, uconfig::RapidjsonFormat<>>::Config;
+
+    virtual void Init(const std::string& config_path) override
+    {
+        Register<uconfig::EnvFormat>(config_path + "_FILE", &file);
+        Register<uconfig::EnvFormat>(config_path + "_ROTATE_MB", &rotate_mb);
+
+        Register<uconfig::RapidjsonFormat<>>(config_path + "/file", &file);
+        Register<uconfig::RapidjsonFormat<>>(config_path + "/rotate_mb", &rotate_mb);
+    }
+};
+
+struct UpstreamConfig: public uconfig::Config<uconfig::EnvFormat, uconfig::RapidjsonFormat<>>
+{
+    uconfig::Variable<std::string> url;
+    uconfig::Variable<unsigned> timeout_ms{100};
+
+    using uconfig::Config<uconfig::EnvFormat, uconfig::RapidjsonFormat<>>::Config;
+
+    virtual void Init(const std::string& config_path) override
+    {
+        Register<uconfig::EnvFormat>(config_path + "_URL", &upsteam_url);
+        Register<uconfig::EnvFormat>(config_path + "_TIMEOUT_MS", &upsteam_timeout_ms);
+
+        Register<uconfig::RapidjsonFormat<>>(config_path + "/url", &upsteam_url);
+        Register<uconfig::RapidjsonFormat<>>(config_path + "/timeout_ms", &upsteam_timeout_ms);
+    }
+};
+
+struct ServerConfig: public uconfig::Config<uconfig::EnvFormat, uconfig::RapidjsonFormat<>>
+{
+    uconfig::Variable<std::string> server_host;
+    uconfig::Variable<unsigned> server_port;
+
+    using uconfig::Config<uconfig::EnvFormat, uconfig::RapidjsonFormat<>>::Config;
+
+    virtual void Init(const std::string& config_path) override
+    {
+        Register<uconfig::EnvFormat>(config_path + "_HOST", &server_host);
+        Register<uconfig::EnvFormat>(config_path + "_PORT", &server_port);
+
+        Register<uconfig::RapidjsonFormat<>>(config_path + "/host", &server_host);
+        Register<uconfig::RapidjsonFormat<>>(config_path + "/port", &server_port);
+    }
+};
+
+struct GlobalConfig: public uconfig::Config<uconfig::EnvFormat, uconfig::RapidjsonFormat<>>
+{
+    LogConfig log_config;
+    UpstreamConfig upstream_config;
+    ServerConfig server_config;
+
+    using uconfig::Config<uconfig::EnvFormat, uconfig::RapidjsonFormat<>>::Config;
+
+    virtual void Init(const std::string&) override
+    {
+        Register<uconfig::EnvFormat>("CFG_LOG", &log_config);
+        Register<uconfig::EnvFormat>("CFG_UPSTEAM", &upstream_config);
+        Register<uconfig::EnvFormat>("CFG_SERVER", &server_config);
+
+        Register<uconfig::RapidjsonFormat<>>("/log", &log_config);
+        Register<uconfig::RapidjsonFormat<>>("/upsteam", &upstream_config);
+        Register<uconfig::RapidjsonFormat<>>("/server", &server_config);
+    }
+};
+```
+
 ### Optional variables
-### Nested names/paths
+
+Any configuration variable can be declared as optional, for different types it has different meaning
+
+#### Optional `uconfig::Variable`
+
 ### Multiformat configuration
-### Custom format
+### Custom formats
 ### Custom types
 
 
