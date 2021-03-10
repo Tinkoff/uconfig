@@ -8,6 +8,7 @@ static const std::vector<int> default_vector{1, 2, 3};
 struct Config: public uconfig::Config<uconfig::EnvFormat, uconfig::RapidjsonFormat<>>
 {
     uconfig::Vector<int> vector;
+    uconfig::Vector<int> optional_vector{true};
     uconfig::Vector<int> optional_empty_vector{default_empty_vector};
     uconfig::Vector<int> optional_default_vector{default_vector};
 
@@ -16,11 +17,11 @@ struct Config: public uconfig::Config<uconfig::EnvFormat, uconfig::RapidjsonForm
     virtual void Init(const std::string&) override
     {
         Register<uconfig::EnvFormat>("VECTOR", &vector);
-        Register<uconfig::EnvFormat>("OPT_VECTOR", &optional_empty_vector);
+        Register<uconfig::EnvFormat>("OPT_EMP_VECTOR", &optional_empty_vector);
         Register<uconfig::EnvFormat>("OPT_DEF_VECTOR", &optional_default_vector);
 
         Register<uconfig::RapidjsonFormat<>>("/vector", &vector);
-        Register<uconfig::RapidjsonFormat<>>("/opt_vector", &optional_empty_vector);
+        Register<uconfig::RapidjsonFormat<>>("/opt_emp_vector", &optional_empty_vector);
         Register<uconfig::RapidjsonFormat<>>("/opt_def_vector", &optional_default_vector);
     }
 };
@@ -36,9 +37,9 @@ struct EnvConfigParam: public EnvFormatParam<Config>
 
     virtual void EmitOptional(std::map<std::string, std::string>* dst) override
     {
-        dst->emplace("OPT_VECTOR_0", "11");
-        dst->emplace("OPT_VECTOR_1", "22");
-        dst->emplace("OPT_VECTOR_2", "33");
+        dst->emplace("OPT_EMP_VECTOR_0", "11");
+        dst->emplace("OPT_EMP_VECTOR_1", "22");
+        dst->emplace("OPT_EMP_VECTOR_2", "33");
         dst->emplace("OPT_DEF_VECTOR_0", "44");
         dst->emplace("OPT_DEF_VECTOR_1", "55");
         dst->emplace("OPT_DEF_VECTOR_2", "66");
@@ -75,11 +76,11 @@ struct RapidjsonConfigParam: public RapidjsonFormatParam<Config>
         }
         auto& allocator = dst->GetAllocator();
 
-        rapidjson::Value opt_vector{rapidjson::kArrayType};
-        opt_vector.PushBack(int(11), allocator);
-        opt_vector.PushBack(int(22), allocator);
-        opt_vector.PushBack(int(33), allocator);
-        dst->AddMember("opt_vector", std::move(opt_vector), allocator);
+        rapidjson::Value opt_emp_vector{rapidjson::kArrayType};
+        opt_emp_vector.PushBack(int(11), allocator);
+        opt_emp_vector.PushBack(int(22), allocator);
+        opt_emp_vector.PushBack(int(33), allocator);
+        dst->AddMember("opt_emp_vector", std::move(opt_emp_vector), allocator);
 
         rapidjson::Value opt_def_vector{rapidjson::kArrayType};
         opt_def_vector.PushBack(int(44), allocator);
@@ -114,6 +115,7 @@ TYPED_TEST_P(Format, ParseNoValuesEmit)
 
     ASSERT_FALSE(config.Initialized());
     ASSERT_FALSE(config.vector.Initialized());
+    ASSERT_FALSE(config.optional_vector.Initialized());
     ASSERT_TRUE(config.optional_empty_vector.Initialized());
     ASSERT_TRUE(config.optional_default_vector.Initialized());
 
@@ -140,6 +142,7 @@ TYPED_TEST_P(Format, ParseNoMandatoryEmit)
 
     ASSERT_FALSE(config.Initialized());
     ASSERT_FALSE(config.vector.Initialized());
+    ASSERT_FALSE(config.optional_vector.Initialized());
     ASSERT_TRUE(config.optional_empty_vector.Initialized());
     ASSERT_TRUE(config.optional_default_vector.Initialized());
 
@@ -166,6 +169,7 @@ TYPED_TEST_P(Format, ParseOnlyMandatoryEmit)
     ASSERT_TRUE(config.Parse(formatter, "", source));
     ASSERT_TRUE(config.Initialized());
     ASSERT_TRUE(config.vector.Initialized());
+    ASSERT_FALSE(config.optional_vector.Initialized());
     ASSERT_TRUE(config.optional_empty_vector.Initialized());
     ASSERT_TRUE(config.optional_default_vector.Initialized());
 

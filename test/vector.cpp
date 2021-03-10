@@ -5,6 +5,18 @@ TEST(Vector, NotInitialized)
 {
     const auto vec = uconfig::Vector<int>();
     ASSERT_FALSE(vec.Initialized());
+    ASSERT_FALSE(vec.Optional());
+
+    ASSERT_THROW(vec.Get(), std::runtime_error);
+    ASSERT_THROW(*vec, std::runtime_error);
+    ASSERT_THROW((std::vector<int>)vec, std::runtime_error);
+}
+
+TEST(Vector, OptNotInitialized)
+{
+    const auto vec = uconfig::Vector<int>(true);
+    ASSERT_FALSE(vec.Initialized());
+    ASSERT_TRUE(vec.Optional());
 
     ASSERT_THROW(vec.Get(), std::runtime_error);
     ASSERT_THROW(*vec, std::runtime_error);
@@ -15,6 +27,7 @@ TEST(Vector, Initialized)
 {
     const auto vec = uconfig::Vector<int>({1, 2, 3});
     ASSERT_TRUE(vec.Initialized());
+    ASSERT_TRUE(vec.Optional());
 }
 
 TEST(Vector, DirectCompare)

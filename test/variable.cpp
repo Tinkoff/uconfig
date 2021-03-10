@@ -5,6 +5,7 @@ TEST(Variable, NotInitialized)
 {
     const auto var = uconfig::Variable<int>();
     ASSERT_FALSE(var.Initialized());
+    ASSERT_FALSE(var.Optional());
 
     ASSERT_THROW(var.Get(), std::runtime_error);
     ASSERT_THROW(*var, std::runtime_error);
@@ -16,6 +17,7 @@ TEST(Variable, Initialized)
 {
     const auto var = uconfig::Variable<int>(123);
     ASSERT_TRUE(var.Initialized());
+    ASSERT_TRUE(var.Optional());
 }
 
 TEST(Variable, DirectCompare)
