@@ -2,267 +2,339 @@
 
 #include "Objects.h"
 
+#include <functional>
+
 namespace uconfig {
 
-class BaseFormat
-{
-public:
-    static inline const std::string name = "[NO FORMAT]";
-    using source_type = void;
-    using dest_type = void;
-
-    template <typename DestT>
-    boost::optional<DestT> Parse(const source_type* source, const std::string& path)
-    {
-        throw std::logic_error("used BaseFormat::Parse<T>");
-    }
-
-    template <typename SrcT>
-    void Emit(const std::string& path, const SrcT& source, dest_type* dest)
-    {
-        throw std::logic_error("used BaseFormat::Emit<T>");
-    }
-
-    virtual std::string VectorElementPath(const std::string& vector_path, std::size_t index) = 0;
-};
-
+/**
+ * Abstract interface for the @p Format.
+ * Separates uconfig::Format from uconfig::Object instances.
+ * Derived instances wraps different objects and used to parse/emit them using @p Format.
+ *
+ * @tparam Format Format this interface interacts with.
+ */
 template <typename Format>
 class Interface
 {
 public:
-    using format_type = Format;
-    using source_type = typename format_type::source_type;
-    using dest_type = typename format_type::dest_type;
+    /// Alias to the @p Format.
+    typedef Format format_type;
+    /// Source this interface parses from.
+    typedef typename Format::source_type source_type;
+    /// Destination this interface emits to.
+    typedef typename Format::dest_type dest_type;
 
-    virtual ~Interface() = default;
-    virtual bool Parse(format_type& parser, const source_type* source, bool stop_on_fail=true) = 0;
-    virtual void Emit(format_type& printer, dest_type* dest) const = 0;
-    virtual const std::string& Path() const = 0;
-    virtual bool Initialized() const = 0;
+    /**
+     * Parse the @p source using @p parser.
+     *
+     * @param[in] parser Parser instance to use.
+     * @param[in] source Source to parse value from.
+     * @param[in] throw_on_fail Will throw an uconfig::ParseError is failed to parse. Default true.
+     *
+     * @returns true if something has been parsed, false otherwise.
+     * @throws uconfig::ParseError May be thrown if @p throw_on_fail.
+     */
+    virtual bool Parse(const format_type& parser, const source_type* source, bool throw_on_fail) = 0;
+
+    /**
+     * Emit to the @p destination using @p emitter.
+     *
+     * @param[in] emitter Emitter instance to use.
+     * @param[in] dest Destination to emit into.
+     * @param[in] throw_on_fail Will throw an uconfig::EmitError is failed to emit. Default true.
+     *
+     * @throws uconfig::EmitError May be thrown if @p throw_on_fail.
+     */
+    virtual void Emit(const format_type& emitter, dest_type* dest, bool throw_on_fail) = 0;
+
+    /// Get path of the object according to the @p Format.
+    virtual const std::string& Path() const noexcept = 0;
+    /// Check if wrapped object has any value in it.
+    virtual bool Initialized() const noexcept = 0;
+    /// Check if wrapped object declared as optional.
+    virtual bool Optional() const noexcept = 0;
 };
 
+/// Interface for uconfig::Config<> objects.
+template <typename Format>
+class ConfigIface: public Interface<Format>
+{
+public:
+    /// Alias to the @p Format.
+    using typename Interface<Format>::format_type;
+    /// Alias to the @p Format::source_type.
+    using typename Interface<Format>::source_type;
+    /// Alias to the @p Format::dest_type.
+    using typename Interface<Format>::dest_type;
+
+    /**
+     * Constructor.
+     *
+     * @param[in] parse_path Path to the config in terms of @p Format.
+     * @param[in] config Pointer to the uconfig::Config<> to wrap.
+     *
+     * @note Does not own @p config. Should not outlive @p config.
+     */
+    template <typename... FormatTs>
+    ConfigIface(const std::string& parse_path, Config<FormatTs...>* config);
+
+    /// Copy constructor.
+    ConfigIface(const ConfigIface<Format>&) = default;
+    /// Copy assignment.
+    ConfigIface<Format>& operator=(const ConfigIface<Format>&) = default;
+    /// Move constructor.
+    ConfigIface(ConfigIface<Format>&&) noexcept = default;
+    /// Move assignment.
+    ConfigIface<Format>& operator=(ConfigIface<Format>&&) noexcept = default;
+
+    /// Destructor.
+    virtual ~ConfigIface() = default;
+
+    /**
+     * Parse referenced uconfig::Config<> from @p source using @p parser.
+     *
+     * @param[in] parser Parser instance to use.
+     * @param[in] source Source to parse from.
+     * @param[in] throw_on_fail Will throw an uconfig::ParseError is failed to parse all mandatory values. Default true.
+     *
+     * @returns true if config has been parsed, false otherwise.
+     * @throws uconfig::ParseError Thrown if @p throw_on_fail.
+     */
+    virtual bool Parse(const format_type& parser, const source_type* source, bool throw_on_fail = true) override;
+
+    /**
+     * Emit referenced uconfig::Config<> to @p destination using @p emitter.
+     *
+     * @param[in] emitter Emitter instance to use.
+     * @param[in] dest Destination to emit into.
+     * @param[in] throw_on_fail Will throw an uconfig::EmitError is failed to emit. Default true.
+     *
+     * @throws uconfig::EmitError Thrown if @p throw_on_fail.
+     */
+    virtual void Emit(const format_type& emitter, dest_type* dest, bool throw_on_fail = true) override;
+
+    /// Get path of the wrapped uconfig::Config<>.
+    virtual const std::string& Path() const noexcept override;
+    /// Check if wrapped uconfig::Config<> has all mandatory values set.
+    virtual bool Initialized() const noexcept override;
+    /// Check if wrapped uconfig::Config<> declared as optional.
+    virtual bool Optional() const noexcept override;
+
+private:
+    std::string path_;
+    bool cfg_optional_;
+    std::vector<std::unique_ptr<Interface<format_type>>>* cfg_interfaces_;
+    std::function<void()> cfg_validate_;
+};
+
+/// Interface for raw objects. Used to interface uconfig::Vector<> elements.
+template <typename T, typename Format>
+class ValueIface: public Interface<Format>
+{
+public:
+    /// Alias to the @p Format.
+    using typename Interface<Format>::format_type;
+    /// Alias to the @p Format::source_type.
+    using typename Interface<Format>::source_type;
+    /// Alias to the @p Format::dest_type.
+    using typename Interface<Format>::dest_type;
+
+    /**
+     * Constructor.
+     *
+     * @param[in] variable_path Path to the variable in terms of @p Format.
+     * @param[in] value Pointer to the value to wrap.
+     *
+     * @note Does not own @p value. Should not outlive @p value.
+     */
+    ValueIface(const std::string& variable_path, T* value);
+
+    /// Copy constructor.
+    ValueIface(const ValueIface<T, Format>&) = default;
+    /// Copy assignment.
+    ValueIface<T, Format>& operator=(const ValueIface<T, Format>&) = default;
+    /// Move constructor.
+    ValueIface(ValueIface<T, Format>&&) noexcept = default;
+    /// Move assignment.
+    ValueIface<T, Format>& operator=(ValueIface<T, Format>&&) noexcept = default;
+
+    /// Destructor.
+    virtual ~ValueIface() = default;
+
+    /**
+     * Parse referenced value from @p source using @p parser.
+     *
+     * @param[in] parser Parser instance to use.
+     * @param[in] source Source to parse from.
+     * @param[in] throw_on_fail Will throw an uconfig::ParseError is failed to parse. Default true.
+     *
+     * @returns true if value has been parsed, false otherwise.
+     * @throws uconfig::ParseError Thrown if @p throw_on_fail.
+     */
+    virtual bool Parse(const format_type& parser, const source_type* source, bool throw_on_fail = true) override;
+
+    /**
+     * Emit referenced value to @p destination using @p emitter.
+     *
+     * @param[in] emitter Emitter instance to use.
+     * @param[in] dest Destination to emit into.
+     * @param[in] throw_on_fail Not used. Always throws if failed to emit.
+     *
+     * @throws uconfig::EmitError Thrown if @p throw_on_fail.
+     */
+    virtual void Emit(const format_type& emitter, dest_type* dest, bool /*throw_on_fail = true*/) override;
+
+    /// Get path of the wrapped value.
+    virtual const std::string& Path() const noexcept override;
+    /// Check if wrapped value has all mandatory values set.
+    virtual bool Initialized() const noexcept override;
+    /// Check if wrapped value declared as optional.
+    virtual bool Optional() const noexcept override;
+
+private:
+    std::string path_;
+    bool initialized_;
+    T* value_ptr_;
+};
+
+/// Interface for uconfig::Variable<> objects.
 template <typename T, typename Format>
 class VariableIface: public Interface<Format>
 {
 public:
-    using format_type = typename Interface<Format>::format_type;
-    using source_type = typename Interface<Format>::source_type;
-    using dest_type = typename Interface<Format>::dest_type;
+    /// Alias to the @p Format.
+    using typename Interface<Format>::format_type;
+    /// Alias to the @p Format::source_type.
+    using typename Interface<Format>::source_type;
+    /// Alias to the @p Format::dest_type.
+    using typename Interface<Format>::dest_type;
 
-    VariableIface(const std::string& parse_path, Variable<T>* var)
-        : variable_path_(parse_path)
-        , variable_(var)
-    {
-        if (!variable_) {
-            throw std::runtime_error("invalid variable pointer to parse");
-        }
-    }
+    /**
+     * Constructor.
+     *
+     * @param[in] variable_path Path to the variable in terms of @p Format.
+     * @param[in] variable Pointer to the uconfig::Variable<> to wrap.
+     *
+     * @note Does not own @p variable. Should not outlive @p variable.
+     */
+    VariableIface(const std::string& variable_path, Variable<T>* variable);
 
+    /// Copy constructor.
     VariableIface(const VariableIface<T, Format>&) = default;
+    /// Copy assignment.
     VariableIface<T, Format>& operator=(const VariableIface<T, Format>&) = default;
+    /// Move constructor.
     VariableIface(VariableIface<T, Format>&&) noexcept = default;
+    /// Move assignment.
     VariableIface<T, Format>& operator=(VariableIface<T, Format>&&) noexcept = default;
 
+    /// Destructor.
     virtual ~VariableIface() = default;
 
-    virtual bool Parse(format_type& parser, const source_type* source, bool stop_on_fail=true) override
-    {
-        boost::optional<T> result_opt = parser.template Parse<T>(source, variable_path_);
+    /**
+     * Parse referenced uconfig::Variable<> from @p source using @p parser.
+     *
+     * @param[in] parser Parser instance to use.
+     * @param[in] source Source to parse from.
+     * @param[in] throw_on_fail Will throw an uconfig::ParseError is failed to parse. Default true.
+     *
+     * @returns true if variable has been parsed, false otherwise.
+     * @throws uconfig::ParseError Thrown if @p throw_on_fail.
+     */
+    virtual bool Parse(const format_type& parser, const source_type* source, bool throw_on_fail = true) override;
 
-        if (!result_opt) {
-            try {
-                if (!variable_->Initialized()) {
-                    throw ParseError("variable is not set");
-                }
-            } catch (const std::exception& e) {
-                // always trows on fail to notify that mandatory variable was not parsed
-                throw ParseError(Format::name + " " + variable_path_ + " is invalid: " + e.what());
-            }
-            return false;
-        }
-        *variable_ = std::move(*result_opt);
-        return true;
-    }
+    /**
+     * Emit referenced uconfig::Variable<> to @p destination using @p emitter.
+     *
+     * @param[in] emitter Emitter instance to use.
+     * @param[in] dest Destination to emit into.
+     * @param[in] throw_on_fail Will throw an uconfig::EmitError is failed to emit. Default true.
+     *
+     * @throws uconfig::EmitError Thrown if @p throw_on_fail.
+     */
+    virtual void Emit(const format_type& emitter, dest_type* dest, bool throw_on_fail = true) override;
 
-    virtual void Emit(format_type& printer, dest_type* dest) const override
-    {
-        printer.Emit(variable_->Get(), variable_path_, dest);
-    }
-
-    virtual const std::string& Path() const override
-    {
-        return variable_path_;
-    }
-
-    virtual bool Initialized() const override
-    {
-        return variable_->Initialized();
-    }
+    /// Get path of the wrapped uconfig::Variable<>.
+    virtual const std::string& Path() const noexcept override;
+    /// Check if wrapped uconfig::Variable<> has all mandatory values set.
+    virtual bool Initialized() const noexcept override;
+    /// Check if wrapped uconfig::Variable<> declared as optional.
+    virtual bool Optional() const noexcept override;
 
 private:
-    std::string variable_path_;
-    Variable<T>* variable_;
+    std::string path_;
+    Variable<T>* variable_ptr_;
 };
 
-template <typename Format>
-class SectionIface: public Interface<Format>
-{
-public:
-    using format_type = typename Interface<Format>::format_type;
-    using source_type = typename Interface<Format>::source_type;
-    using dest_type = typename Interface<Format>::dest_type;
-
-    SectionIface(const std::string& parse_path, Section<Format>* sec)
-        : section_path_(parse_path)
-        , section_(sec)
-    {
-        if (!section_) {
-            throw std::runtime_error("invalid section pointer to parse");
-        }
-    }
-
-    SectionIface(const SectionIface<Format>&) = default;
-    SectionIface<Format>& operator=(const SectionIface<Format>&) = default;
-    SectionIface(SectionIface<Format>&&) noexcept = default;
-    SectionIface<Format>& operator=(SectionIface<Format>&&) noexcept = default;
-
-    virtual ~SectionIface() = default;
-
-    virtual bool Parse(format_type& parser, const source_type* source, bool stop_on_fail=true) override
-    {
-        bool mandatory_set = true;
-        bool section_parsed = false;
-
-        section_->interfaces_.clear();
-        section_->Init(section_path_);
-        for (auto& iface : section_->interfaces_) {
-            bool iface_parsed;
-            try {
-                iface_parsed = iface->Parse(parser, source, stop_on_fail);
-            } catch (const ParseError&) {
-                mandatory_set = false;
-                iface_parsed = false;
-                if (!section_->Optional() && stop_on_fail) {
-                    throw;
-                }
-            }
-
-            // section considered parsed if at least one of its' interfaces parsed
-            section_parsed |= iface_parsed;
-        }
-        // section considered initialized if parsed and all mandatory has been set
-        section_->initialized_ = section_parsed && mandatory_set;
-        section_->PostParse();
-        return section_parsed;
-    }
-
-    virtual void Emit(format_type& printer, dest_type* dest) const override
-    {
-        try {
-            if (!section_->Initialized()) {
-                return;
-            }
-        } catch (const std::exception& e) {
-            throw ParseError(Format::name + " " + section_path_ + " is invalid: " + e.what());
-        }
-
-        section_->interfaces_.clear();
-        section_->Init(section_path_);
-        for (const auto& iface : section_->interfaces_) {
-            iface->Emit(printer, dest);
-        }
-    }
-
-    virtual const std::string& Path() const override
-    {
-        return section_path_;
-    }
-
-    virtual bool Initialized() const override
-    {
-        return section_->Initialized();
-    }
-
-private:
-    std::string section_path_;
-    Section<Format>* section_;
-};
-
+/// Interface for uconfig::Vector<> objects.
 template <typename T, typename Format>
 class VectorIface: public Interface<Format>
 {
 public:
-    using format_type = typename Interface<Format>::format_type;
-    using source_type = typename Interface<Format>::source_type;
-    using dest_type = typename Interface<Format>::dest_type;
+    /// Alias to the @p Format.
+    using typename Interface<Format>::format_type;
+    /// Alias to the @p Format::source_type.
+    using typename Interface<Format>::source_type;
+    /// Alias to the @p Format::dest_type.
+    using typename Interface<Format>::dest_type;
 
-    VectorIface(const std::string& parse_path, Vector<T>* list)
-        : vector_path_(parse_path)
-        , element_vector_(list)
-    {
-        if (!element_vector_) {
-            throw std::runtime_error("invalid list pointer to parse");
-        }
-    }
+    /**
+     * Constructor.
+     *
+     * @param[in] vector_path Path to the vector in terms of @p Format.
+     * @param[in] vector Pointer to the uconfig::Vector<> to wrap.
+     *
+     * @note Does not own @p vector. Should not outlive @p vector.
+     */
+    VectorIface(const std::string& vector_path, Vector<T>* vector);
 
+    /// Copy constructor.
     VectorIface(const VectorIface<T, Format>&) = default;
+    /// Copy assignment.
     VectorIface<T, Format>& operator=(const VectorIface<T, Format>&) = default;
+    /// Move constructor.
     VectorIface(VectorIface<T, Format>&&) noexcept = default;
+    /// Move assignment.
     VectorIface<T, Format>& operator=(VectorIface<T, Format>&&) noexcept = default;
 
+    /// Destructor.
     virtual ~VectorIface() = default;
 
-    virtual bool Parse(format_type& parser, const source_type* source, bool stop_on_fail=true) override
-    {
-        using iface_type = typename T::template iface_type<Format>;
+    /**
+     * Parse referenced uconfig::Vector<> from @p source using @p parser.
+     *
+     * @param[in] parser Parser instance to use.
+     * @param[in] source Source to parse from.
+     * @param[in] throw_on_fail Will throw an uconfig::ParseError is failed to parse. Default true.
+     *
+     * @returns true if vector has been parsed, false otherwise.
+     * @throws uconfig::ParseError Thrown if @p throw_on_fail.
+     */
+    virtual bool Parse(const format_type& parser, const source_type* source, bool throw_on_fail = true) override;
 
-        std::size_t index = 0;
-        while (true) {
-            T element;
-            bool parsed;
+    /**
+     * Emit referenced uconfig::Vector<> to @p destination using @p emitter.
+     *
+     * @param[in] emitter Emitter instance to use.
+     * @param[in] dest Destination to emit into.
+     * @param[in] throw_on_fail Will throw an uconfig::EmitError is failed to emit. Default true.
+     *
+     * @throws uconfig::EmitError Thrown if @p throw_on_fail.
+     */
+    virtual void Emit(const format_type& emitter, dest_type* dest, bool throw_on_fail = true) override;
 
-            iface_type iface(parser.VectorElementPath(vector_path_, index), &element);
-            try {
-                parsed = iface.Parse(parser, source, stop_on_fail);
-            } catch (const ParseError&) {
-                parsed = false;
-            }
-            // always stops on fail to prevent looping
-            if (!parsed || !iface.Initialized()) {
-                break;
-            }
-
-            ++index;
-            element_vector_->emplace_back(std::move(element));
-        }
-
-        element_vector_->PostParse();
-        return index > 0;
-    }
-
-    virtual void Emit(format_type& printer, dest_type* dest) const override
-    {
-        using iface_type = typename T::template iface_type<Format>;
-
-        for (std::size_t i = 0; i < element_vector_->size(); ++i) {
-            iface_type iface(printer.VectorElementPath(vector_path_, i), &element_vector_->at(i));
-            iface.Emit(printer, dest);
-        }
-    }
-
-    virtual const std::string& Path() const override
-    {
-        return vector_path_;
-    }
-
-    virtual bool Initialized() const override
-    {
-        return element_vector_->Initialized();
-    }
+    /// Get path of the wrapped uconfig::Vector<>.
+    virtual const std::string& Path() const noexcept override;
+    /// Check if wrapped uconfig::Vector<> has all mandatory values set.
+    virtual bool Initialized() const noexcept override;
+    /// Check if wrapped uconfig::Vector<> declared as optional.
+    virtual bool Optional() const noexcept override;
 
 private:
-    std::string vector_path_;
-    Vector<T>* element_vector_;
+    std::string path_;
+    Vector<T>* vector_ptr_;
 };
 
 } // namespace uconfig
+
+#include "impl/Interface.ipp"

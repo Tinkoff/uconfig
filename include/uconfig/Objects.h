@@ -1,367 +1,385 @@
 #pragma once
 
-#include <boost/optional.hpp>
+#include "detail/detail.h"
 
-#include <list>
 #include <memory>
-#include <ostream>
+#include <optional>
+#include <typeindex>
+#include <unordered_set>
 #include <vector>
 
 namespace uconfig {
-/// Forward-declared Interface.
-template <typename Format>
-class Interface;
-/// Forward-declared VariableIface.
-template <typename T, typename Format>
-class VariableIface;
-/// Forward-declared SectionIface.
-template <typename Format>
-class SectionIface;
-/// Forward-declared VectorIface.
-template <typename T, typename Format>
-class VectorIface;
 
-struct ParseError: public std::runtime_error
+/// Base error thrown in uconfig.
+struct Error: public std::runtime_error
 {
     using std::runtime_error::runtime_error;
 };
 
+/// Parser error thrown in uconfig.
+struct ParseError: public Error
+{
+    using Error::Error;
+};
+
+/// Emitter error thrown in uconfig.
+struct EmitError: public Error
+{
+    using Error::Error;
+};
+
+/// Abstract object interface.
+class Object
+{
+public:
+    // template <typename F>
+    // using iface_type;
+
+    virtual bool Initialized() const noexcept = 0;
+    virtual bool Optional() const noexcept = 0;
+    virtual void Validate() const {};
+};
+
 /**
- * Configuration variable.
+ * Configuration object.
  *
- * This class implements storage entity for configuration variables.
- * Any config represented as a bunch of such variables grouped into
- * @p Section or @p Vector to provide nested structure.
+ * @tparam Format Type of the formatter to parse/emit.
+ */
+template <typename... FormatTs>
+class Config: public Object
+{
+public:
+    template <typename F>
+    using iface_type = ConfigIface<F>;
+
+    template <typename F>
+    friend class ConfigIface;
+
+    /**
+     * Constructor.
+     *
+     * @param[in] optional If section considered to be optional (may be not initialized). Default false.
+     */
+    Config(bool optional = false);
+
+    /// Copy constructor.
+    Config(const Config<FormatTs...>& other);
+    /// Copy assignment.
+    Config<FormatTs...>& operator=(const Config<FormatTs...>& other);
+    /// Move constructor.
+    Config(Config<FormatTs...>&& other) noexcept;
+    /// Move assignment.
+    Config<FormatTs...>& operator=(Config<FormatTs...>&& other) noexcept;
+
+    /// Destructor.
+    virtual ~Config() = default;
+
+    /**
+     * Parse the config at @p path from @p source using @p parser.
+     *
+     * @param[in] parser Parser instance to use.
+     * @param[in] path Path where the config resides in @p source.
+     * @param[in] source Source to parse from.
+     * @param[in] throw_on_fail Will throw an uconfig::ParseError is failed to parse all mandatory children.
+     *  Default true.
+     *
+     * @returns true if config has been found in some form in the @p source, false otherwise.
+     * @throws uconfig::ParseError Thrown if @p throw_on_fail.
+     */
+    template <typename F>
+    bool Parse(const F& parser, const std::string& path, const typename F::source_type* source,
+               bool throw_on_fail = true);
+
+    /**
+     * Emit the config at @p path to @p destination using @p emitter.
+     *
+     * @param[in] emitter Emitter instance to use.
+     * @param[in] path Path where the config should be in @p destination.
+     * @param[in] destination Destination to emit into.
+     * @param[in] throw_on_fail Will throw an uconfig::EmitError is failed to emit. Default true.
+     *
+     * @throws uconfig::EmitError Thrown if @p throw_on_fail.
+     */
+    template <typename F>
+    void Emit(const F& emitter, const std::string& path, typename F::dest_type* destination, bool throw_on_fail = true);
+
+    /**
+     * Check if config has all mandatory values.
+     *
+     * @returns true if it has, false otherwise.
+     */
+    virtual bool Initialized() const noexcept override;
+
+    /**
+     * Check if config is marked as optional.
+     *
+     * @returns true if has been, false otherwise.
+     */
+    virtual bool Optional() const noexcept override;
+
+protected:
+    /**
+     * Initialize config before parsing.
+     * This function get called within Parse() and expected to register all variables
+     *  in the config with respected paths. To register a variable call Register().
+     *
+     * @param[in] config_path Path of this config for the Format.
+     *
+     * @returns true if it has, false otherwise.
+     */
+    virtual void Init(const std::string& config_path) = 0;
+
+    /**
+     * Register a child for this config.
+     * This function should be called for all children of the config to get them parsed/emitted.
+     *
+     * @tparam T Type of element to register. T should be either `uconfig::Variable,
+     *  uconfig::Vector or another uconfig::Config.
+     *
+     * @param[in] element_path Path of the child.
+     * @param[in] element Pointer to the child.
+     *
+     * @returns true if it has, false otherwise.
+     */
+    template <typename F, typename T>
+    void Register(const std::string& element_path, T* element) noexcept;
+
+private:
+    /// Reset all registered children.
+    void Reset() noexcept;
+
+    template <typename F>
+    void SetFormat() noexcept;
+
+    /// Get all registered children interfaces for specified format @F.
+    template <typename F>
+    std::vector<std::unique_ptr<Interface<F>>>& Interfaces() noexcept;
+
+private:
+    bool optional_ = false;
+    std::unordered_set<Object*> elements_;
+    std::unordered_set<std::type_index> register_formats_;
+    std::tuple<std::vector<std::unique_ptr<Interface<FormatTs>>>...> interfaces_;
+};
+
+/**
+ * Variable object.
  *
  * @tparam T Type of underlying variable to store.
  */
 template <typename T>
-class Variable
+class Variable: public Object
 {
 public:
     template <typename F>
     using iface_type = VariableIface<T, F>;
 
-    /// Default constructor.
-    Variable()
-        : value_(boost::none)
-    {
-    }
+    template <typename U, typename F>
+    friend class VariableIface;
 
-    /**
-     * Default-initialized variable constructor.
-     *
-     * @param[in] init_value Value to initialize variable with.
-     */
-    Variable(T&& init_value)
-        : value_(std::move(init_value))
-    {
-    }
+    /// Constructor.
+    Variable();
+    /// Constructor.
+    Variable(T&& init_value);
+    /// Constructor.
+    Variable(const T& init_value);
 
     /// Copy constructor.
     Variable(const Variable<T>&) = default;
     /// Copy assignment.
     Variable<T>& operator=(const Variable<T>&) = default;
     /// Move constructor.
-    Variable(Variable<T>&& other) noexcept
-        : value_(std::move(other.value_))
-    {
-    }
+    Variable(Variable<T>&& other) noexcept = default;
     /// Move assignment.
-    Variable<T>& operator=(Variable<T>&& other) noexcept
-    {
-        value_ = std::move(other.value_);
-        return *this;
-    }
-    /// Move assignment from rvalue of T.
-    Variable<T>& operator=(T&& other) noexcept
-    {
-        value_ = std::move(other);
-        return *this;
-    }
+    Variable<T>& operator=(Variable<T>&& other) noexcept = default;
+    /// Move assignment from T.
+    Variable<T>& operator=(T&& other) noexcept;
 
     /// Destructor.
     virtual ~Variable() = default;
 
     /**
+     * Check if variable has a value.
+     *
+     * @returns true if it has, false otherwise.
+     */
+    virtual bool Initialized() const noexcept override;
+
+    /**
+     * Check if variable is marked as optional.
+     *
+     * @returns true if has been, false otherwise.
+     */
+    virtual bool Optional() const noexcept override;
+
+    /**
+     * Read the value.
+     *
+     * @returns A reference to the value.
+     * @throws uconfig::Error Thrown if variable has no value.
+     */
+    T& Get();
+
+    /**
      * Read the value.
      *
      * @returns A const reference to the value.
-     * @throws std::runtime_error Thrown if variable has no value.
+     * @throws uconfig::Error Thrown if variable has no value.
      */
-    const T& Get() const
-    {
-        if (!Initialized()) {
-            throw std::runtime_error("config variable is not set");
-        }
-        return *value_;
-    }
+    const T& Get() const;
 
     /**
-     * Check if variable has a value.
+     * Dereference operator. Read the value.
      *
-     * @returns true if has, false otherwise.
+     * @returns A reference to the value.
+     * @throws uconfig::Error Thrown if variable has no value.
      */
-    bool Initialized() const
-    {
-        return value_ != boost::none;
-    }
-
-    operator const T&() const
-    {
-        return Get();
-    }
+    T& operator*();
 
     /**
-     * Dereference operator. Access the value.
+     * Dereference operator. Read the value.
      *
      * @returns A const reference to the value.
-     * @throws std::runtime_error Thrown if variable has no value.
+     * @throws uconfig::Error Thrown if variable has no value.
      */
-    const T& operator*() const
-    {
-        return Get();
-    }
+    const T& operator*() const;
 
     /**
-     * Structure dereference operator. Access the value.
+     * Structure dereference operator. Read the value.
+     *
+     * @returns A pointer to the value.
+     * @throws uconfig::Error Thrown if variable has no value.
+     */
+    T* operator->();
+
+    /**
+     * Structure dereference operator. Read the value.
      *
      * @returns A const pointer to the value.
-     * @throws std::runtime_error Thrown if variable has no value.
+     * @throws uconfig::Error Thrown if variable has no value.
      */
-    const T* operator->() const
-    {
-        return &Get();
-    }
+    const T* operator->() const;
+
+    /**
+     * Explicit conversation to `T&`.
+     *
+     * @throws uconfig::Error Thrown if variable has no value.
+     */
+    explicit operator T&();
+
+    /**
+     * Explicit conversation to `const T&`.
+     *
+     * @throws uconfig::Error Thrown if variable has no value.
+     */
+    explicit operator const T&() const;
+
+    /* enable left and right-handed comparisons */
+
+    template <typename V, typename U>
+    friend bool operator==(const Variable<V>& lhs, const Variable<U>& rhs);
+    template <typename V, typename U, std::enable_if_t<!detail::is_base_of_template<U, Variable>::value, bool>>
+    friend bool operator==(const U& lhs, const Variable<V>& rhs);
+    template <typename V, typename U, std::enable_if_t<!detail::is_base_of_template<U, Variable>::value, bool>>
+    friend bool operator==(const Variable<V>& lhs, const U& rhs);
+
+    template <typename V, typename U>
+    friend bool operator!=(const Variable<V>& lhs, const Variable<U>& rhs);
+    template <typename V, typename U, std::enable_if_t<!detail::is_base_of_template<U, Variable>::value, bool>>
+    friend bool operator!=(const U& lhs, const Variable<V>& rhs);
+    template <typename V, typename U, std::enable_if_t<!detail::is_base_of_template<U, Variable>::value, bool>>
+    friend bool operator!=(const Variable<V>& lhs, const U& rhs);
+
+    template <typename V, typename U>
+    friend bool operator>(const U& lhs, const Variable<V>& rhs);
+    template <typename V, typename U>
+    friend bool operator>(const Variable<V>& lhs, const U& rhs);
+
+    template <typename V, typename U>
+    friend bool operator<(const U& lhs, const Variable<V>& rhs);
+    template <typename V, typename U>
+    friend bool operator<(const Variable<V>& lhs, const U& rhs);
+
+    template <typename V, typename U>
+    friend bool operator>=(const U& lhs, const Variable<V>& rhs);
+    template <typename V, typename U>
+    friend bool operator>=(const Variable<V>& lhs, const U& rhs);
+
+    template <typename V, typename U>
+    friend bool operator<=(const U& lhs, const Variable<V>& rhs);
+    template <typename V, typename U>
+    friend bool operator<=(const Variable<V>& lhs, const U& rhs);
 
 protected:
-    boost::optional<T> value_; ///< Stored value or none.
+    bool optional_ = false;
+    std::optional<T> value_ = std::nullopt; ///< Stored value or none.
 };
-
-/// If variable has value insert it into the stream, otherwise insert "[not set]".
-template <typename T>
-std::ostream& operator<<(std::ostream& out, const Variable<T>& var)
-{
-    if (!var.Initialized()) {
-        return out << "[not set]";
-    }
-    return out << var.Get();
-}
-/// operator+ for T and Variable<T>.
-template <typename T>
-T operator+(const T& lhs, const Variable<T>& var)
-{
-    return lhs + var.Get();
-}
-/// operator+ for char* and Variable<std::string>.
-inline std::string operator+(const char* lhs, const Variable<std::string>& var)
-{
-    return std::string(lhs) + var.Get();
-}
-/// operator- for T and Variable<T>.
-template <typename T>
-T operator-(const T& lhs, const Variable<T>& var)
-{
-    return lhs - var.Get();
-}
-/// operator== for T and Variable<T>.
-template <typename T>
-bool operator==(const T& lhs, const Variable<T>& var)
-{
-    return lhs == var.Get();
-}
-/// operator!= for T and Variable<T>.
-template <typename T>
-bool operator!=(const T& lhs, const Variable<T>& var)
-{
-    return lhs != var.Get();
-}
-/// operator> for T and Variable<T>.
-template <typename T>
-bool operator>(const T& lhs, const Variable<T>& var)
-{
-    return lhs > var.Get();
-}
-/// operator< for T and Variable<T>.
-template <typename T>
-bool operator<(const T& lhs, const Variable<T>& var)
-{
-    return lhs < var.Get();
-}
-/// operator>= for T and Variable<T>.
-template <typename T>
-bool operator>=(const T& lhs, const Variable<T>& var)
-{
-    return lhs >= var.Get();
-}
-/// operator<= for T and Variable<T>.
-template <typename T>
-bool operator<=(const T& lhs, const Variable<T>& var)
-{
-    return lhs <= var.Get();
-}
-/// operator+ for Variable<T> and char*.
-template <typename T>
-T operator+(const Variable<T>& var, const T& rhs)
-{
-    return var.Get() + rhs;
-}
-/// operator+ for Variable<std::string> and char*.
-inline std::string operator+(const Variable<std::string>& var, const char* rhs)
-{
-    return var.Get() + std::string(rhs);
-}
-/// operator- for T and Variable<T>.
-template <typename T>
-T operator-(const Variable<T>& var, const T& rhs)
-{
-    return var.Get() - rhs;
-}
-/// operator== for T and Variable<T>.
-template <typename T>
-bool operator==(const Variable<T>& var, const T& rhs)
-{
-    return var.Get() == rhs;
-}
-/// operator!= for T and Variable<T>.
-template <typename T>
-bool operator!=(const Variable<T>& var, const T& rhs)
-{
-    return var.Get() != rhs;
-}
-/// operator> for T and Variable<T>.
-template <typename T>
-bool operator>(const Variable<T>& var, const T& rhs)
-{
-    return var.Get() > rhs;
-}
-/// operator< for T and Variable<T>.
-template <typename T>
-bool operator<(const Variable<T>& var, const T& rhs)
-{
-    return var.Get() < rhs;
-}
-/// operator>= for T and Variable<T>.
-template <typename T>
-bool operator>=(const Variable<T>& var, const T& rhs)
-{
-    return var.Get() >= rhs;
-}
-/// operator<= for T and Variable<T>.
-template <typename T>
-bool operator<=(const Variable<T>& var, const T& rhs)
-{
-    return var.Get() <= rhs;
-}
 
 /**
- * Static container (group) of configuration parameters
+ * Vector object.
  *
- * This class implements base for config sections. Inherited classes should register its' elements
- * (variables, sections, vectors) with Register() calls to enable parsing/emitting for the section.
- *
- * @tparam Format Type of the formatter to parse/emit.
+ * @tparam T Type to form vector of.
  */
-template <typename Format>
-class Section
-{
-public:
-    template <typename F>
-    using iface_type = SectionIface<F>;
-
-    friend class SectionIface<Format>;
-
-    /**
-     * Constructor.
-     *
-     * @param[in] optional If section considered to be optional (may be not initialized).
-     */
-    Section(bool optional = false)
-        : initialized_(false)
-        , optional_(optional)
-    {
-    }
-
-    /**
-     * Copy constructor.
-     * Copy-initialized Section is not parsable. Call Init() first.
-     */
-    Section(const Section<Format>& other)
-        : initialized_(other.initialized_)
-        , optional_(other.optional_)
-    {
-    }
-
-    /**
-     * Copy assignment.
-     * Copy-initialized Section is not parsable. Call Init() first.
-     */
-    Section<Format>& operator=(const Section<Format>& other)
-    {
-        interfaces_.clear();
-        initialized_ = other.initialized_;
-        optional_ = other.optional_;
-        return *this;
-    }
-
-    Section(Section<Format>&& other) = delete;
-    Section<Format>& operator=(Section<Format>&& other) = delete;
-
-    virtual ~Section() = default;
-
-    virtual void Init(const std::string& parse_path) = 0;
-
-    virtual bool Initialized() const
-    {
-        return initialized_;
-    }
-
-    virtual bool Optional() const
-    {
-        return optional_;
-    }
-
-    virtual void PostParse() const {}
-
-protected:
-    template <typename T>
-    void Register(const std::string& parse_path, T* element)
-    {
-        using iface_type = typename T::template iface_type<Format>;
-        interfaces_.emplace_back(std::make_unique<iface_type>(parse_path, element));
-    }
-
-private:
-    std::vector<std::unique_ptr<Interface<Format>>> interfaces_;
-    bool initialized_ = false;
-    bool optional_ = false;
-};
-
 template <typename T>
-class Vector: public std::vector<T>
+class Vector: public Variable<std::vector<T>>
 {
 public:
     template <typename F>
     using iface_type = VectorIface<T, F>;
 
-    using std::vector<T>::vector;
+    template <typename U, typename F>
+    friend class VectorIface;
 
-    template <typename OtherT, typename std::enable_if<std::is_convertible<T, OtherT>::value>::type* = nullptr>
-    operator std::vector<OtherT>() const
-    {
-        std::vector<OtherT> result;
-        for (const T& i : *this) {
-            result.push_back((OtherT)i);
-        }
-        return result;
-    }
+    /**
+     * Constructor.
+     *
+     * @param[in] optional If vector considered to be optional (may be not initialized). Default false.
+     */
+    Vector(bool optional = false);
+    /// Constructor.
+    Vector(std::vector<T>&& init_value);
+    /// Constructor.
+    Vector(const std::vector<T>& init_value);
 
-    bool Initialized() const
-    {
-        return true;
-    }
+    /// Copy constructor.
+    Vector(const Vector<T>&) = default;
+    /// Copy assignment.
+    Vector<T>& operator=(const Vector<T>&) = default;
+    /// Move constructor.
+    Vector(Vector<T>&& other) noexcept = default;
+    /// Move assignment.
+    Vector<T>& operator=(Vector<T>&& other) noexcept = default;
+    /// Move assignment from std::vector<T>.
+    Vector<T>& operator=(std::vector<T>&& vector) noexcept;
 
-    virtual void PostParse() const {}
+    /// Destructor.
+    virtual ~Vector() = default;
+
+    /**
+     * Get the value from underlying vector.
+     *
+     * @param[in] pos Position to get value at.
+     *
+     * @returns A reference to the value at @p pos.
+     * @throws uconfig::Error Thrown if vector has no value.
+     */
+    T& operator[](std::size_t pos);
+
+    /**
+     * Get the value from underlying vector.
+     *
+     * @param[in] pos Position to get value at.
+     *
+     * @returns A const reference to the value at @p pos.
+     * @throws uconfig::Error Thrown if vector has no value.
+     */
+    const T& operator[](std::size_t pos) const;
+
+    // operator== for Vector<Variable<V>> and std::vector<V>.
+    template <typename V>
+    friend bool operator==(const Vector<Variable<V>>& lhs, const std::vector<V>& rhs);
 };
 
 } // namespace uconfig
+
+#include "impl/Objects.ipp"
