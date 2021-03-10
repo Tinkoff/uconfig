@@ -18,6 +18,7 @@ C++ header-only library to parse and emit **multi-format** configuration for you
     * [Multiformat configuration](#multiformat-configuration)
     * [Custom formats](#custom-formats)
     * [Custom types](#custom-types)
+    * [Value validation](#value-validation)
 * [How to build](#how-to-build)
 
 ## Quickstart
@@ -95,11 +96,7 @@ Will parse:
 * `app_config.nodes[0].port` from `APP_TIMEOUT_NODE_0_PORT`, [1] from `...NODE_1...` etc
 * `app_config.endpoints[0]` from `APP_ENDPOINT_0`, [1] from `...ENDPOINT_1...` etc
 
-If any of mandatory variables is not parsed `Parse()` would throw an exception forbidding to use invalid `app_config`. You can override it by specifying `throw_on_fail = false` for:
-```c++
-template <typename F>
-bool Parse(const F& parser, const std::string& path, const typename F::source_type* source, bool throw_on_fail = true);
-```
+If any of mandatory variables is not parsed `Parse()` would throw an exception forbidding to use invalid `app_config`. You can override it by specifying `throw_on_fail = false` for `Parse()`.
 
 5. Use variables as you normally do or dereference them via `*` or `->`:
 ```c++
@@ -188,7 +185,7 @@ Supports:
 Full name for the variable formed by nested calls of `void Config<>::Init(const std::string& config_path)` with parent name passed as `config_path`.
 By design variables naming scheme is arbitrary, meaning you are free to call `Register()` with whatever string you want. But if format supports hierarchy, names should respect it and represent some hierarchical paths.
 
-For example, JSON-objects have hierarchy, so `uconfig::RapidjsonFormat` uses JSON-pointer for variable names, so
+For example, JSON-objects have hierarchy and `uconfig::RapidjsonFormat` uses JSON-pointer for variable names, so
 ```c++
 Register<uconfig::RapidjsonFormat>("/a/b/c", &variable);
 ```
@@ -293,7 +290,7 @@ struct GlobalConfig: public uconfig::Config<uconfig::RapidjsonFormat<>>
 
 ### Optional elements
 
-All configuration elements can be defined as optional, for different types it is done differently and has different meaning.
+All configuration elements can be defined as optional. For different types it is done differently and has different meaning.
 
 #### `uconfig::Variable`
 
@@ -315,7 +312,7 @@ uconfig::Vector<int> all_numbers{true};
 uconfig::Vector<int> selected_numbers{{1, 2, 3, 4, 5}};
 uconfig::Vector<int> blacklisted_numbers{{}};
 ```
-defines optional vector `all_numbers` **without** default value, `selected_numbers` – optional with `std::vector<int>{1, 2, 3, 4, 5}` as default value, `blacklisted_numbers` – optional empty by-default vector.
+defines optional vector `all_numbers` without default value, `selected_numbers` – optional with `std::vector<int>{1, 2, 3, 4, 5}` as default value, `blacklisted_numbers` – optional empty by-default vector.
 
 * If optional vector is not parsed from the source, it has default value if any.
 * Parser won't stop if failed to lookup optional vector in the source.
@@ -345,7 +342,7 @@ struct ServerConfig: public uconfig::Config<uconfig::EnvFormat, uconfig::Rapidjs
 };
 ```
 
-Upon parsing the config you can use `throw_on_fail` parameter to ignore absent mandatory for specific format:
+Upon parsing the config you can use `throw_on_fail` parameter to ignore absent mandatory elements in specific format:
 ```c++
 // Only port set in JSON
 rapidjson::Document config_json{rapidjson::kObjectType};
@@ -368,8 +365,160 @@ assert(srv_config.Initialized());
 It allows to specify most of the configuration parameters via bulky JSON-file and overwrite or set some of them via env-variables, for example, production/qa specific.
 
 ### Custom formats
+
+To implement custom format you need to derive from `uconfig::Format` and specify/override all of it members/functions. Its' interface is self-explanatory, so:
+```c++
+class Format
+{
+public:
+    /// Name of the format. Used to form nice error-strings.
+    static inline const std::string name = "[NO FORMAT]";
+    /// Source of the format to parse from.
+    using source_type = void;
+    /// Destination of the format to emit to.
+    using dest_type = void;
+
+    /**
+     * Parse the value at @p path from @p source.
+     *
+     * @tparam T Type to parse.
+     *
+     * @param[in] source Source to parse value from.
+     * @param[in] path Path where the value resides in @p source.
+     *
+     * @returns Value wrapped in std::optional or std::nullopt.
+     */
+    template <typename T>
+    std::optional<T> Parse(const source_type* source, const std::string& path) const;
+
+    /**
+     * Emit the value at @p path to @p dest.
+     *
+     * @tparam T Type to emit.
+     *
+     * @param[in] dest Destination to emit to.
+     * @param[in] path Path where to emit.
+     * @param[in] value Value to emit.
+     */
+    template <typename T>
+    void Emit(dest_type* dest, const std::string& path, const T& value) const;
+
+    /**
+     * Construct path to a vector element at @p index accroding to the format.
+     *
+     * @param[in] vector_path Path to the vector itself.
+     * @param[in] index Position in the vector to make path to.
+     *
+     * @returns Path to the vector element at @p index.
+     */
+    virtual std::string VectorElementPath(const std::string& vector_path, std::size_t index) const noexcept = 0;
+};
+```
+
+`Parse<T>()` and `Emit<T>()` will be called for all types used for `uconfig::Variable<T>` and `uconfig::Vector<T>` in your configs. For examples you can look into `uconfig::EnvFormat` or `uconfig::RapidjsonFormat` implementation.
+
 ### Custom types
 
+If you want config parameters to be a `enum` or some other custom type you need to provide specializations for functions:
+```c++
+template <typename T>
+std::optional<T> Parse(const source_type* source, const std::string& path) const;
+
+template <typename T>
+void Emit(dest_type* dest, const std::string& path, const T& value) const;
+```
+of desired format. For example:
+
+```c++
+enum class LogLevel
+{
+    FATAL,
+    CRITICAL,
+    WARNING,
+    INFO,
+    DEBUG,
+    VERBOSE,
+};
+
+template <>
+std::optional<LogLevel> uconfig::EnvFormat::Parse<Log::Level>(const void*, const std::string& path)
+{
+    const char* env_var = std::getenv(path.c_str());
+    if (!env_var) {
+        return std::nullopt;
+    }
+
+    if (lvl_str == "fatal") {
+        return LogLevel::FATAL;
+    } else if (lvl_str == "critical") {
+        return LogLevel::CRITICAL;
+    } else if (lvl_str == "warning") {
+        return LogLevel::WARNING;
+    } else if (lvl_str == "info") {
+        return LogLevel::INFO;
+    } else if (lvl_str == "debug") {
+        return LogLevel::DEBUG;
+    } else if (lvl_str == "verbose") {
+        return LogLevel::VERBOSE;
+    }
+
+    return std::nullopt;
+}
+
+template <>
+void uconfig::EnvFormat::Emit<LogLevel>(const LogLevel& value, const std::string& path, std::map<std::string, std::string>* dest)
+{
+    switch (lvl) {
+    case LogLevel::FATAL:
+        dest->emplace(path, "FATAL");
+    case LogLevel::CRITICAL:
+        dest->emplace(path, "ERROR");
+    case LogLevel::WARNING:
+        dest->emplace(path, "WARN");
+    case LogLevel::INFO:
+        dest->emplace(path, "INFO");
+    case LogLevel::DEBUG:
+        dest->emplace(path, "DEBUG");
+    case LogLevel::VERBOSE:
+        dest->emplace(path, "TRACE");
+    }
+}
+```
+
+Then you can use it in the config:
+```c++
+struct LogConfig: public uconfig::Config<uconfig::EnvFormat>
+{
+    uconfig::Variable<LogLevel> level;
+
+    using uconfig::Config<uconfig::EnvFormat>::Config;
+
+    virtual void Init(const std::string& config_path) override
+    {
+        Register<uconfig::EnvFormat>(config_path + "_LEVEL", &level);
+    }
+};
+```
+
+### Value validation
+
+If you want to validate values you should override `virtual void Validate() const` for new element. This function get called after value has been parsed and will cause `Parse()` to throw an exception if `throw_on_fail = true`.
+
+For example:
+
+```c++
+struct EvenInteger: public uconfig::Variable<int>
+{
+    using uconfig::Variable<int>::Variable;
+
+    virtual void Validate() const override
+    {
+        if (Get() % 2) {
+            throw std::runtime_error(std::to_string(Get()) + " is not even");
+        }
+    }
+};
+```
 
 ## How to build
 

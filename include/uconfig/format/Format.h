@@ -38,8 +38,8 @@ public:
      * @param[in] path Path where to emit.
      * @param[in] value Value to emit.
      */
-    template <typename ValueT>
-    void Emit(dest_type* dest, const std::string& path, const ValueT& value) const;
+    template <typename T>
+    void Emit(dest_type* dest, const std::string& path, const T& value) const;
 
     /**
      * Construct path to a vector element at @p index accroding to the format.
