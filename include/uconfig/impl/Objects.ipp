@@ -210,7 +210,7 @@ template <typename T>
 Vector<T>::Vector(bool optional)
 {
     this->optional_ = optional;
-    this->value_ = optional ? std::make_optional(std::vector<T>()) : std::nullopt;
+    this->value_ = std::nullopt;
 }
 
 template <typename T>
