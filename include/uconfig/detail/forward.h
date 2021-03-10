@@ -19,7 +19,7 @@ template <typename T, typename Format>
 class VectorIface;
 
 /// Forward-declared Config.
-template <typename Format>
+template <typename ...FormatTs>
 class Config;
 /// Forward-declared Variable.
 template <typename T>

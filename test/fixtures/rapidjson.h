@@ -3,8 +3,12 @@
 #include <rapidjson/stringbuffer.h>
 #include <rapidjson/writer.h>
 
+template <typename ConfigType>
+struct RapidjsonTypeParam: public TypeParam<ConfigType, uconfig::RapidjsonFormat<>>
+{};
+
 template <class ConfigType>
-struct RapidjsonParam: public FormatParam<ConfigType>
+struct RapidjsonFormatParam: public FormatParam<RapidjsonTypeParam<ConfigType>>
 {
     virtual ConfigType Config() override
     {
@@ -54,7 +58,7 @@ protected:
 };
 
 template <class ConfigType>
-rapidjson::Document RapidjsonParam<ConfigType>::kJsonSource{rapidjson::kObjectType};
+rapidjson::Document RapidjsonFormatParam<ConfigType>::kJsonSource{rapidjson::kObjectType};
 
 namespace rapidjson {
 

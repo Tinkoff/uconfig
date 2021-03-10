@@ -2,7 +2,7 @@
 
 /* Config with variables in it */
 
-struct EnvConfig: public uconfig::Config<uconfig::EnvFormat>
+struct Config: public uconfig::Config<uconfig::EnvFormat, uconfig::RapidjsonFormat<>>
 {
     uconfig::Variable<int> int_var;
     uconfig::Variable<double> double_var;
@@ -10,21 +10,25 @@ struct EnvConfig: public uconfig::Config<uconfig::EnvFormat>
     uconfig::Variable<long int> longint_var;
     uconfig::Variable<int> optional_int_var{111};
 
-    using format_type = uconfig::EnvFormat;
-
-    using uconfig::Config<uconfig::EnvFormat>::Config;
+    using uconfig::Config<uconfig::EnvFormat, uconfig::RapidjsonFormat<>>::Config;
 
     virtual void Init(const std::string&) override
     {
-        Register("INT", &int_var);
-        Register("DOUBLE", &double_var);
-        Register("STRING", &str_var);
-        Register("LONGINT", &longint_var);
-        Register("OPT_INT", &optional_int_var);
+        Register<uconfig::EnvFormat>("INT", &int_var);
+        Register<uconfig::EnvFormat>("DOUBLE", &double_var);
+        Register<uconfig::EnvFormat>("STRING", &str_var);
+        Register<uconfig::EnvFormat>("LONGINT", &longint_var);
+        Register<uconfig::EnvFormat>("OPT_INT", &optional_int_var);
+
+        Register<uconfig::RapidjsonFormat<>>("/int", &int_var);
+        Register<uconfig::RapidjsonFormat<>>("/double", &double_var);
+        Register<uconfig::RapidjsonFormat<>>("/string", &str_var);
+        Register<uconfig::RapidjsonFormat<>>("/longint", &longint_var);
+        Register<uconfig::RapidjsonFormat<>>("/opt_int", &optional_int_var);
     }
 };
 
-struct EnvConfigParam: public EnvParam<EnvConfig>
+struct EnvConfigParam: public EnvFormatParam<Config>
 {
     virtual void EmitDefault(std::map<std::string, std::string>* dst) override
     {
@@ -45,29 +49,7 @@ struct EnvConfigParam: public EnvParam<EnvConfig>
     }
 };
 
-struct RapidjsonConfig: public uconfig::Config<uconfig::RapidjsonFormat<>>
-{
-    uconfig::Variable<int> int_var;
-    uconfig::Variable<double> double_var;
-    uconfig::Variable<std::string> str_var;
-    uconfig::Variable<long int> longint_var;
-    uconfig::Variable<int> optional_int_var{111};
-
-    using format_type = uconfig::RapidjsonFormat<>;
-
-    using uconfig::Config<uconfig::RapidjsonFormat<>>::Config;
-
-    virtual void Init(const std::string&) override
-    {
-        Register("/int", &int_var);
-        Register("/double", &double_var);
-        Register("/string", &str_var);
-        Register("/longint", &longint_var);
-        Register("/opt_int", &optional_int_var);
-    }
-};
-
-struct RapidjsonConfigParam: public RapidjsonParam<RapidjsonConfig>
+struct RapidjsonConfigParam: public RapidjsonFormatParam<Config>
 {
     virtual void EmitDefault(rapidjson::Document* dst) override
     {
@@ -202,14 +184,14 @@ TYPED_TEST_P(Format, ParseAllEmit)
 
 REGISTER_TYPED_TEST_CASE_P(Format, ParseNoValuesEmit, ParseNoMandatoryEmit, ParseOnlyMandatoryEmit, ParseAllEmit);
 
-typedef ::testing::Types<EnvConfig, RapidjsonConfig> ConfigTypes;
+typedef ::testing::Types<EnvTypeParam<Config>, RapidjsonTypeParam<Config>> ConfigTypes;
 INSTANTIATE_TYPED_TEST_CASE_P(VarsConfig, Format, ConfigTypes);
 
 // clang-format off
 template <>
-std::unique_ptr<FormatParam<EnvConfig>> Format<EnvConfig>::context = std::make_unique<EnvConfigParam>();
+std::unique_ptr<FormatParam<EnvTypeParam<Config>>> Format<EnvTypeParam<Config>>::context = std::make_unique<EnvConfigParam>();
 template <>
-std::unique_ptr<FormatParam<RapidjsonConfig>> Format<RapidjsonConfig>::context = std::make_unique<RapidjsonConfigParam>();
+std::unique_ptr<FormatParam<RapidjsonTypeParam<Config>>> Format<RapidjsonTypeParam<Config>>::context = std::make_unique<RapidjsonConfigParam>();
 // clang-format on
 
 int main(int argc, char** argv)

@@ -5,25 +5,27 @@
 static const std::vector<int> default_empty_vector{};
 static const std::vector<int> default_vector{1, 2, 3};
 
-struct EnvConfig: public uconfig::Config<uconfig::EnvFormat>
+struct Config: public uconfig::Config<uconfig::EnvFormat, uconfig::RapidjsonFormat<>>
 {
     uconfig::Vector<int> vector;
     uconfig::Vector<int> optional_empty_vector{true};
     uconfig::Vector<int> optional_default_vector{default_vector};
 
-    using format_type = uconfig::EnvFormat;
-
-    using uconfig::Config<uconfig::EnvFormat>::Config;
+    using uconfig::Config<uconfig::EnvFormat, uconfig::RapidjsonFormat<>>::Config;
 
     virtual void Init(const std::string&) override
     {
-        Register("VECTOR", &vector);
-        Register("OPT_VECTOR", &optional_empty_vector);
-        Register("OPT_DEF_VECTOR", &optional_default_vector);
+        Register<uconfig::EnvFormat>("VECTOR", &vector);
+        Register<uconfig::EnvFormat>("OPT_VECTOR", &optional_empty_vector);
+        Register<uconfig::EnvFormat>("OPT_DEF_VECTOR", &optional_default_vector);
+
+        Register<uconfig::RapidjsonFormat<>>("/vector", &vector);
+        Register<uconfig::RapidjsonFormat<>>("/opt_vector", &optional_empty_vector);
+        Register<uconfig::RapidjsonFormat<>>("/opt_def_vector", &optional_default_vector);
     }
 };
 
-struct EnvConfigParam: public EnvParam<EnvConfig>
+struct EnvConfigParam: public EnvFormatParam<Config>
 {
     virtual void EmitDefault(std::map<std::string, std::string>* dst) override
     {
@@ -50,25 +52,7 @@ struct EnvConfigParam: public EnvParam<EnvConfig>
     }
 };
 
-struct RapidjsonConfig: public uconfig::Config<uconfig::RapidjsonFormat<>>
-{
-    uconfig::Vector<int> vector;
-    uconfig::Vector<int> optional_empty_vector{true};
-    uconfig::Vector<int> optional_default_vector{default_vector};
-
-    using format_type = uconfig::RapidjsonFormat<>;
-
-    using uconfig::Config<uconfig::RapidjsonFormat<>>::Config;
-
-    virtual void Init(const std::string&) override
-    {
-        Register("/vector", &vector);
-        Register("/opt_vector", &optional_empty_vector);
-        Register("/opt_def_vector", &optional_default_vector);
-    }
-};
-
-struct RapidjsonConfigParam: public RapidjsonParam<RapidjsonConfig>
+struct RapidjsonConfigParam: public RapidjsonFormatParam<Config>
 {
     virtual void EmitDefault(rapidjson::Document* dst) override
     {
@@ -226,14 +210,14 @@ TYPED_TEST_P(Format, ParseAllEmit)
 
 REGISTER_TYPED_TEST_CASE_P(Format, ParseNoValuesEmit, ParseNoMandatoryEmit, ParseOnlyMandatoryEmit, ParseAllEmit);
 
-typedef ::testing::Types<EnvConfig, RapidjsonConfig> ConfigTypes;
+typedef ::testing::Types<EnvTypeParam<Config>, RapidjsonTypeParam<Config>> ConfigTypes;
 INSTANTIATE_TYPED_TEST_CASE_P(VectorConfig, Format, ConfigTypes);
 
 // clang-format off
 template <>
-std::unique_ptr<FormatParam<EnvConfig>> Format<EnvConfig>::context = std::make_unique<EnvConfigParam>();
+std::unique_ptr<FormatParam<EnvTypeParam<Config>>> Format<EnvTypeParam<Config>>::context = std::make_unique<EnvConfigParam>();
 template <>
-std::unique_ptr<FormatParam<RapidjsonConfig>> Format<RapidjsonConfig>::context = std::make_unique<RapidjsonConfigParam>();
+std::unique_ptr<FormatParam<RapidjsonTypeParam<Config>>> Format<RapidjsonTypeParam<Config>>::context = std::make_unique<RapidjsonConfigParam>();
 // clang-format on
 
 int main(int argc, char** argv)

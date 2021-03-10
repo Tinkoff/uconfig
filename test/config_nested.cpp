@@ -4,53 +4,53 @@
 
 static const int default_int = 300;
 
-struct VarEnvConfig: public uconfig::Config<uconfig::EnvFormat>
+struct VarConfig: public uconfig::Config<uconfig::EnvFormat, uconfig::RapidjsonFormat<>>
 {
     uconfig::Variable<int> int_var;
 
-    using format_type = uconfig::EnvFormat;
-
-    using uconfig::Config<uconfig::EnvFormat>::Config;
+    using uconfig::Config<uconfig::EnvFormat, uconfig::RapidjsonFormat<>>::Config;
 
     virtual void Init(const std::string& config_path) override
     {
-        Register(config_path + "_INT", &int_var);
+        Register<uconfig::EnvFormat>(config_path + "_INT", &int_var);
+        Register<uconfig::RapidjsonFormat<>>(config_path + "/int", &int_var);
     }
 };
 
-struct OptEnvConfig: public uconfig::Config<uconfig::EnvFormat>
+struct OptVarConfig: public uconfig::Config<uconfig::EnvFormat, uconfig::RapidjsonFormat<>>
 {
     uconfig::Variable<int> int_var{default_int};
 
-    using format_type = uconfig::EnvFormat;
-
-    using uconfig::Config<uconfig::EnvFormat>::Config;
+    using uconfig::Config<uconfig::EnvFormat, uconfig::RapidjsonFormat<>>::Config;
 
     virtual void Init(const std::string& config_path) override
     {
-        Register(config_path + "_INT", &int_var);
+        Register<uconfig::EnvFormat>(config_path + "_INT", &int_var);
+        Register<uconfig::RapidjsonFormat<>>(config_path + "/int", &int_var);
     }
 };
 
-struct EnvConfig: public uconfig::Config<uconfig::EnvFormat>
+struct Config: public uconfig::Config<uconfig::EnvFormat, uconfig::RapidjsonFormat<>>
 {
-    VarEnvConfig var_config;
-    VarEnvConfig var_config_opt{true};
-    OptEnvConfig opt_var_config;
+    VarConfig var_config;
+    VarConfig var_config_opt{true};
+    OptVarConfig opt_var_config;
 
-    using format_type = uconfig::EnvFormat;
-
-    using uconfig::Config<uconfig::EnvFormat>::Config;
+    using uconfig::Config<uconfig::EnvFormat, uconfig::RapidjsonFormat<>>::Config;
 
     virtual void Init(const std::string& config_path) override
     {
-        Register(config_path + "_NESTED", &var_config);
-        Register(config_path + "_OPT_NESTED", &var_config_opt);
-        Register(config_path + "_NESTED_OPT", &opt_var_config);
+        Register<uconfig::EnvFormat>(config_path + "_NESTED", &var_config);
+        Register<uconfig::EnvFormat>(config_path + "_OPT_NESTED", &var_config_opt);
+        Register<uconfig::EnvFormat>(config_path + "_NESTED_OPT", &opt_var_config);
+
+        Register<uconfig::RapidjsonFormat<>>(config_path + "/nested", &var_config);
+        Register<uconfig::RapidjsonFormat<>>(config_path + "/opt_nested", &var_config_opt);
+        Register<uconfig::RapidjsonFormat<>>(config_path + "/nested_opt", &opt_var_config);
     }
 };
 
-struct EnvConfigParam: public EnvParam<EnvConfig>
+struct EnvConfigParam: public EnvFormatParam<Config>
 {
     virtual void EmitDefault(std::map<std::string, std::string>* dst) override
     {
@@ -69,53 +69,7 @@ struct EnvConfigParam: public EnvParam<EnvConfig>
     }
 };
 
-struct VarJsonConfig: public uconfig::Config<uconfig::RapidjsonFormat<>>
-{
-    uconfig::Variable<int> int_var;
-
-    using format_type = uconfig::RapidjsonFormat<>;
-
-    using uconfig::Config<uconfig::RapidjsonFormat<>>::Config;
-
-    virtual void Init(const std::string& config_path) override
-    {
-        Register(config_path + "/int", &int_var);
-    }
-};
-
-struct OptJsonConfig: public uconfig::Config<uconfig::RapidjsonFormat<>>
-{
-    uconfig::Variable<int> int_var{default_int};
-
-    using format_type = uconfig::RapidjsonFormat<>;
-
-    using uconfig::Config<uconfig::RapidjsonFormat<>>::Config;
-
-    virtual void Init(const std::string& config_path) override
-    {
-        Register(config_path + "/int", &int_var);
-    }
-};
-
-struct RapidjsonConfig: public uconfig::Config<uconfig::RapidjsonFormat<>>
-{
-    VarJsonConfig var_config;
-    VarJsonConfig var_config_opt{true};
-    OptJsonConfig opt_var_config;
-
-    using format_type = uconfig::RapidjsonFormat<>;
-
-    using uconfig::Config<uconfig::RapidjsonFormat<>>::Config;
-
-    virtual void Init(const std::string& config_path) override
-    {
-        Register(config_path + "/nested", &var_config);
-        Register(config_path + "/opt_nested", &var_config_opt);
-        Register(config_path + "/nested_opt", &opt_var_config);
-    }
-};
-
-struct RapidjsonConfigParam: public RapidjsonParam<RapidjsonConfig>
+struct RapidjsonConfigParam: public RapidjsonFormatParam<Config>
 {
     virtual void EmitDefault(rapidjson::Document* dst) override
     {
@@ -262,14 +216,14 @@ TYPED_TEST_P(Format, ParseAllEmit)
 
 REGISTER_TYPED_TEST_CASE_P(Format, ParseNoValuesEmit, ParseNoMandatoryEmit, ParseOnlyMandatoryEmit, ParseAllEmit);
 
-typedef ::testing::Types<EnvConfig, RapidjsonConfig> ConfigTypes;
+typedef ::testing::Types<EnvTypeParam<Config>, RapidjsonTypeParam<Config>> ConfigTypes;
 INSTANTIATE_TYPED_TEST_CASE_P(NestedConfig, Format, ConfigTypes);
 
 // clang-format off
 template <>
-std::unique_ptr<FormatParam<EnvConfig>> Format<EnvConfig>::context = std::make_unique<EnvConfigParam>();
+std::unique_ptr<FormatParam<EnvTypeParam<Config>>> Format<EnvTypeParam<Config>>::context = std::make_unique<EnvConfigParam>();
 template <>
-std::unique_ptr<FormatParam<RapidjsonConfig>> Format<RapidjsonConfig>::context = std::make_unique<RapidjsonConfigParam>();
+std::unique_ptr<FormatParam<RapidjsonTypeParam<Config>>> Format<RapidjsonTypeParam<Config>>::context = std::make_unique<RapidjsonConfigParam>();
 // clang-format on
 
 int main(int argc, char** argv)

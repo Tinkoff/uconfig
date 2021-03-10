@@ -2,8 +2,12 @@
 
 #include <unordered_set>
 
+template <typename ConfigType>
+struct EnvTypeParam: public TypeParam<ConfigType, uconfig::EnvFormat>
+{};
+
 template <class ConfigType>
-struct EnvParam: public FormatParam<ConfigType>
+struct EnvFormatParam: public FormatParam<EnvTypeParam<ConfigType>>
 {
     virtual ConfigType Config() override
     {
@@ -67,7 +71,7 @@ protected:
 };
 
 template <class ConfigType>
-std::unordered_set<std::string> EnvParam<ConfigType>::kEnvSetted{};
+std::unordered_set<std::string> EnvFormatParam<ConfigType>::kEnvSetted{};
 
 namespace std {
 

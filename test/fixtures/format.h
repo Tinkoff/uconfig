@@ -1,13 +1,22 @@
 #include "uconfig/Interface.h"
 #include "gtest/gtest.h"
 
-template <class ConfigType>
+template <typename ConfigType, typename FormatType>
+struct TypeParam
+{
+    using config_type = ConfigType;
+    using format_type = FormatType;
+};
+
+template <typename TypeParam>
 struct FormatParam
 {
-    using source_type = typename ConfigType::format_type::source_type;
-    using dest_type = typename ConfigType::format_type::dest_type;
+    using config_type = typename TypeParam::config_type;
+    using format_type = typename TypeParam::format_type;
+    using source_type = typename format_type::source_type;
+    using dest_type = typename format_type::dest_type;
 
-    virtual ConfigType Config() = 0;
+    virtual config_type Config() = 0;
     virtual source_type* Source() = 0;
     virtual void SetOptional(source_type*) = 0;
     virtual void SetMandatory(source_type*) = 0;
@@ -19,7 +28,7 @@ struct FormatParam
     virtual void EmitAll(dest_type*) = 0;
 };
 
-template <class ConfigType>
+template <typename TypeParam>
 struct Format: public ::testing::Test
 {
     void TearDown() override
@@ -27,7 +36,7 @@ struct Format: public ::testing::Test
         context->Clear();
     }
 
-    static std::unique_ptr<FormatParam<ConfigType>> context;
+    static std::unique_ptr<FormatParam<TypeParam>> context;
 };
 
 TYPED_TEST_CASE_P(Format);

@@ -4,63 +4,112 @@
 
 namespace uconfig {
 
-template <typename Format>
-Config<Format>::Config(bool optional)
+template <typename... FormatTs>
+Config<FormatTs...>::Config(bool optional)
     : optional_(optional)
 {
 }
 
-template <typename Format>
-Config<Format>::Config(const Config<Format>& other)
+template <typename... FormatTs>
+Config<FormatTs...>::Config(const Config<FormatTs...>& other)
     : optional_(other.optional_)
 {
 }
 
-template <typename Format>
-Config<Format>& Config<Format>::operator=(const Config<Format>& other)
+template <typename... FormatTs>
+Config<FormatTs...>& Config<FormatTs...>::operator=(const Config<FormatTs...>& other)
 {
-    interfaces_.clear();
-    optional_ = other.optional_;
+    if (this != &other) {
+        Reset();
+        optional_ = other.optional_;
+    }
     return *this;
 }
 
-template <typename Format>
-bool Config<Format>::Parse(const Format& parser, const std::string& path, const typename Format::source_type* source,
-                           bool throw_on_fail)
+template <typename... FormatTs>
+Config<FormatTs...>::Config(Config<FormatTs...>&& other) noexcept
+    : optional_(std::move(other.optional_))
 {
-    return iface_type<Format>{path, this}.Parse(parser, source, throw_on_fail);
 }
 
-template <typename Format>
-void Config<Format>::Emit(const Format& emitter, const std::string& path, typename Format::dest_type* destination,
-                          bool throw_on_fail)
+template <typename... FormatTs>
+Config<FormatTs...>& Config<FormatTs...>::operator=(Config<FormatTs...>&& other) noexcept
 {
-    return iface_type<Format>{path, this}.Emit(emitter, destination, throw_on_fail);
+    if (this != &other) {
+        Reset();
+        optional_ = std::move(other.optional_);
+    }
+    return *this;
 }
 
-template <typename Format>
-bool Config<Format>::Initialized() const noexcept
+template <typename... FormatTs>
+template <typename F>
+bool Config<FormatTs...>::Parse(const F& parser, const std::string& path, const typename F::source_type* source,
+                                bool throw_on_fail)
 {
-    for (const auto& iface : interfaces_) {
-        if (!iface->Initialized() && !iface->Optional()) {
+    return iface_type<F>{path, this}.Parse(parser, source, throw_on_fail);
+}
+
+template <typename... FormatTs>
+template <typename F>
+void Config<FormatTs...>::Emit(const F& emitter, const std::string& path, typename F::dest_type* destination,
+                               bool throw_on_fail)
+{
+    return iface_type<F>{path, this}.Emit(emitter, destination, throw_on_fail);
+}
+
+template <typename... FormatTs>
+bool Config<FormatTs...>::Initialized() const noexcept
+{
+    for (const auto* elem : elements_) {
+        if (!elem->Initialized() && !elem->Optional()) {
             return false;
         }
     }
     return true;
 }
 
-template <typename Format>
-bool Config<Format>::Optional() const noexcept
+template <typename... FormatTs>
+bool Config<FormatTs...>::Optional() const noexcept
 {
     return optional_;
 }
 
-template <typename Format>
-template <typename T>
-void Config<Format>::Register(const std::string& element_path, T* element) noexcept
+template <typename... FormatTs>
+template <typename F, typename T>
+void Config<FormatTs...>::Register(const std::string& element_path, T* element) noexcept
 {
-    using element_iface_type = typename T::template iface_type<Format>;
-    interfaces_.emplace_back(std::make_unique<element_iface_type>(element_path, element));
+    using elem_iface_type = typename T::template iface_type<F>;
+
+    if (!register_formats_.count(std::type_index(typeid(F)))) {
+        return;
+    }
+
+    auto& fmt_ifaces = Interfaces<F>();
+    fmt_ifaces.emplace_back(std::make_unique<elem_iface_type>(element_path, element));
+    elements_.insert(element);
+}
+
+template <typename... FormatTs>
+void Config<FormatTs...>::Reset() noexcept
+{
+    elements_ = {};
+    interfaces_ = {};
+    register_formats_ = {};
+}
+
+template <typename... FormatTs>
+template <typename F>
+void Config<FormatTs...>::SetFormat() noexcept
+{
+    register_formats_.insert(std::type_index(typeid(F)));
+}
+
+template <typename... FormatTs>
+template <typename F>
+std::vector<std::unique_ptr<Interface<F>>>& Config<FormatTs...>::Interfaces() noexcept
+{
+    return std::get<std::vector<std::unique_ptr<Interface<F>>>>(interfaces_);
 }
 
 template <typename T>

@@ -2,6 +2,8 @@
 
 #include "Objects.h"
 
+#include <functional>
+
 namespace uconfig {
 
 /**
@@ -71,9 +73,10 @@ public:
      * @param[in] parse_path Path to the config in terms of @p Format.
      * @param[in] config Pointer to the uconfig::Config<> to wrap.
      *
-     * @note Does not own @p config.
+     * @note Does not own @p config. Should not outlive @p config.
      */
-    ConfigIface(const std::string& parse_path, Config<format_type>* config);
+    template <typename... FormatTs>
+    ConfigIface(const std::string& parse_path, Config<FormatTs...>* config);
 
     /// Copy constructor.
     ConfigIface(const ConfigIface<Format>&) = default;
@@ -119,7 +122,9 @@ public:
 
 private:
     std::string path_;
-    Config<Format>* config_ptr_;
+    bool cfg_optional_;
+    std::vector<std::unique_ptr<Interface<format_type>>>* cfg_interfaces_;
+    std::function<void()> cfg_validate_;
 };
 
 /// Interface for raw objects. Used to interface uconfig::Vector<> elements.
@@ -140,7 +145,7 @@ public:
      * @param[in] variable_path Path to the variable in terms of @p Format.
      * @param[in] value Pointer to the value to wrap.
      *
-     * @note Does not own @p value.
+     * @note Does not own @p value. Should not outlive @p value.
      */
     ValueIface(const std::string& variable_path, T* value);
 
@@ -210,7 +215,7 @@ public:
      * @param[in] variable_path Path to the variable in terms of @p Format.
      * @param[in] variable Pointer to the uconfig::Variable<> to wrap.
      *
-     * @note Does not own @p value.
+     * @note Does not own @p variable. Should not outlive @p variable.
      */
     VariableIface(const std::string& variable_path, Variable<T>* variable);
 
@@ -279,7 +284,7 @@ public:
      * @param[in] vector_path Path to the vector in terms of @p Format.
      * @param[in] vector Pointer to the uconfig::Vector<> to wrap.
      *
-     * @note Does not own @p value.
+     * @note Does not own @p vector. Should not outlive @p vector.
      */
     VectorIface(const std::string& vector_path, Vector<T>* vector);
 

@@ -4,6 +4,8 @@
 
 #include <memory>
 #include <optional>
+#include <typeindex>
+#include <unordered_set>
 #include <vector>
 
 namespace uconfig {
@@ -43,7 +45,7 @@ public:
  *
  * @tparam Format Type of the formatter to parse/emit.
  */
-template <typename Format>
+template <typename... FormatTs>
 class Config: public Object
 {
 public:
@@ -61,13 +63,13 @@ public:
     Config(bool optional = false);
 
     /// Copy constructor.
-    Config(const Config<Format>& other);
+    Config(const Config<FormatTs...>& other);
     /// Copy assignment.
-    Config<Format>& operator=(const Config<Format>& other);
+    Config<FormatTs...>& operator=(const Config<FormatTs...>& other);
     /// Move constructor.
-    Config(Config<Format>&& other) = delete;
+    Config(Config<FormatTs...>&& other) noexcept;
     /// Move assignment.
-    Config<Format>& operator=(Config<Format>&& other) = delete;
+    Config<FormatTs...>& operator=(Config<FormatTs...>&& other) noexcept;
 
     /// Destructor.
     virtual ~Config() = default;
@@ -84,7 +86,8 @@ public:
      * @returns true if config has been found in some form in the @p source, false otherwise.
      * @throws uconfig::ParseError Thrown if @p throw_on_fail.
      */
-    bool Parse(const Format& parser, const std::string& path, const typename Format::source_type* source,
+    template <typename F>
+    bool Parse(const F& parser, const std::string& path, const typename F::source_type* source,
                bool throw_on_fail = true);
 
     /**
@@ -97,8 +100,8 @@ public:
      *
      * @throws uconfig::EmitError Thrown if @p throw_on_fail.
      */
-    void Emit(const Format& emitter, const std::string& path, typename Format::dest_type* destination,
-              bool throw_on_fail = true);
+    template <typename F>
+    void Emit(const F& emitter, const std::string& path, typename F::dest_type* destination, bool throw_on_fail = true);
 
     /**
      * Check if config has all mandatory values.
@@ -138,12 +141,25 @@ protected:
      *
      * @returns true if it has, false otherwise.
      */
-    template <typename T>
+    template <typename F, typename T>
     void Register(const std::string& element_path, T* element) noexcept;
 
 private:
-    std::vector<std::unique_ptr<Interface<Format>>> interfaces_;
+    /// Reset all registered children.
+    void Reset() noexcept;
+
+    template <typename F>
+    void SetFormat() noexcept;
+
+    /// Get all registered children interfaces for specified format @F.
+    template <typename F>
+    std::vector<std::unique_ptr<Interface<F>>>& Interfaces() noexcept;
+
+private:
     bool optional_ = false;
+    std::unordered_set<Object*> elements_;
+    std::unordered_set<std::type_index> register_formats_;
+    std::tuple<std::vector<std::unique_ptr<Interface<FormatTs>>>...> interfaces_;
 };
 
 /**

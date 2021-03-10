@@ -3,13 +3,19 @@
 namespace uconfig {
 
 template <typename Format>
-ConfigIface<Format>::ConfigIface(const std::string& parse_path, Config<format_type>* config)
+template <typename... FormatTs>
+ConfigIface<Format>::ConfigIface(const std::string& parse_path, Config<FormatTs...>* config)
     : path_(parse_path)
-    , config_ptr_(config)
 {
-    if (!config_ptr_) {
+    if (!config) {
         throw std::runtime_error("invalid section pointer to parse");
     }
+    config->Reset();
+    config->template SetFormat<Format>();
+    config->Init(Path());
+    cfg_optional_ = config->Optional();
+    cfg_interfaces_ = &config->template Interfaces<format_type>();
+    cfg_validate_ = [config]() { config->Validate(); };
 }
 
 template <typename Format>
@@ -17,9 +23,7 @@ bool ConfigIface<Format>::Parse(const format_type& parser, const source_type* so
 {
     bool config_parsed = false;
 
-    config_ptr_->interfaces_.clear();
-    config_ptr_->Init(Path());
-    for (auto& iface : config_ptr_->interfaces_) {
+    for (auto& iface : *cfg_interfaces_) {
         bool iface_parsed;
         try {
             iface_parsed = iface->Parse(parser, source, throw_on_fail);
@@ -34,7 +38,7 @@ bool ConfigIface<Format>::Parse(const format_type& parser, const source_type* so
     }
 
     try {
-        config_ptr_->Validate();
+        cfg_validate_();
     } catch (const Error& ex) {
         if (throw_on_fail) {
             throw ParseError(ex.what());
@@ -50,10 +54,7 @@ bool ConfigIface<Format>::Parse(const format_type& parser, const source_type* so
 template <typename Format>
 void ConfigIface<Format>::Emit(const format_type& emitter, dest_type* dest, bool throw_on_fail)
 {
-    config_ptr_->interfaces_.clear();
-    config_ptr_->Init(Path());
-
-    for (const auto& iface : config_ptr_->interfaces_) {
+    for (auto& iface : *cfg_interfaces_) {
         try {
             iface->Emit(emitter, dest, throw_on_fail);
         } catch (const Error& ex) {
@@ -73,13 +74,18 @@ const std::string& ConfigIface<Format>::Path() const noexcept
 template <typename Format>
 bool ConfigIface<Format>::Initialized() const noexcept
 {
-    return config_ptr_->Initialized();
+    for (const auto& iface : *cfg_interfaces_) {
+        if (!iface->Initialized() && !iface->Optional()) {
+            return false;
+        }
+    }
+    return true;
 }
 
 template <typename Format>
 bool ConfigIface<Format>::Optional() const noexcept
 {
-    return config_ptr_->Optional();
+    return cfg_optional_;
 }
 
 template <typename T, typename Format>
