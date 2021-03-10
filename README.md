@@ -5,6 +5,8 @@
 
 C++ header-only library to parse and emit **multi-format** configuration for your app. For example, you can parse JSON-file into the config and then compliment it from environment variables.
 
+It requires c++17 compatible compiler and [Rapidjson](https://rapidjson.org/) if you're planning to use JSON formatting.
+
 * [Quickstart](#quickstart)
 * [Detailed description](#detailed-description)
     * [Configuration elements](#configuration-elements)
