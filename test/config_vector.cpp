@@ -8,7 +8,7 @@ static const std::vector<int> default_vector{1, 2, 3};
 struct Config: public uconfig::Config<uconfig::EnvFormat, uconfig::RapidjsonFormat<>>
 {
     uconfig::Vector<int> vector;
-    uconfig::Vector<int> optional_empty_vector{true};
+    uconfig::Vector<int> optional_empty_vector{default_empty_vector};
     uconfig::Vector<int> optional_default_vector{default_vector};
 
     using uconfig::Config<uconfig::EnvFormat, uconfig::RapidjsonFormat<>>::Config;
