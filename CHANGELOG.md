@@ -1,3 +1,17 @@
+# 2.0.0 (2021-03-10)
+
+### Features
+
+* Section -> Config
+* Support Vector of plain types
+* Support optional and default values for Vector
+* Config template is multiformat
+* Cofig::Register is format templated
+* Add doxygen-format docs
+* Add tests
+* Add README
+* Add CHANGELOG
+
 # 1.2.0 (2020-09-11)
 
 ### Features
