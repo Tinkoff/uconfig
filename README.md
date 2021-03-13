@@ -56,8 +56,8 @@ struct NodeConfig: public uconfig::Config<uconfig::EnvFormat>
 
     virtual void Init(const std::string& config_path) override
     {
-        Register<uconfig::EnvFormat>(config_path + "_HOST", &int_var);
-        Register<uconfig::EnvFormat>(config_path + "_PORT", &optional_int_var);
+        Register<uconfig::EnvFormat>(config_path + "_HOST", &host);
+        Register<uconfig::EnvFormat>(config_path + "_PORT", &port);
     }
 };
 
@@ -254,8 +254,8 @@ struct UpstreamConfig: public uconfig::Config<uconfig::RapidjsonFormat<>>
 
     virtual void Init(const std::string& config_path) override
     {
-        Register<uconfig::RapidjsonFormat<>>(config_path + "/url", &upsteam_url);
-        Register<uconfig::RapidjsonFormat<>>(config_path + "/timeout_ms", &upsteam_timeout_ms);
+        Register<uconfig::RapidjsonFormat<>>(config_path + "/url", &url);
+        Register<uconfig::RapidjsonFormat<>>(config_path + "/timeout_ms", &timeout_ms);
     }
 };
 

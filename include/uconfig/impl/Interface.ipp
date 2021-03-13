@@ -226,13 +226,16 @@ bool VectorIface<T, Format>::Parse(const format_type& parser, const source_type*
     std::optional<Error> last_error;
     while (true) {
         T element;
-
-        elem_iface_type iface(parser.VectorElementPath(Path(), index), &element);
+        bool elem_parsed = false;
+        elem_iface_type elem_iface(parser.VectorElementPath(Path(), index), &element);
         try {
-            iface.Parse(parser, source, true);
+            elem_parsed = elem_iface.Parse(parser, source, true);
         } catch (const Error& ex) {
-            // always stop on fail to prevent looping
             last_error = ex;
+            break;
+        }
+        // always stop on fail to prevent looping
+        if (!elem_parsed || last_error) {
             break;
         }
 

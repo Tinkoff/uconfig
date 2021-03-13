@@ -5,9 +5,32 @@
 static const std::vector<int> default_empty_vector{};
 static const std::vector<int> default_vector{1, 2, 3};
 
+class DefaultValue: public uconfig::Variable<int>
+{
+public:
+    template <typename F>
+    using iface_type = uconfig::VariableIface<int, F>;
+
+    template <typename U, typename F>
+    friend class uconfig::VariableIface;
+
+    DefaultValue()
+        : uconfig::Variable<int>(-1)
+    {
+    }
+
+    DefaultValue(const DefaultValue&) = default;
+    DefaultValue& operator=(const DefaultValue&) = default;
+    DefaultValue(DefaultValue&& other) noexcept = default;
+    DefaultValue& operator=(DefaultValue&& other) noexcept = default;
+
+    virtual ~DefaultValue() = default;
+};
+
 struct Config: public uconfig::Config<uconfig::EnvFormat, uconfig::RapidjsonFormat<>>
 {
     uconfig::Vector<int> vector;
+    uconfig::Vector<DefaultValue> vector_of_def;
     uconfig::Vector<int> optional_vector{true};
     uconfig::Vector<int> optional_empty_vector{default_empty_vector};
     uconfig::Vector<int> optional_default_vector{default_vector};
@@ -17,10 +40,12 @@ struct Config: public uconfig::Config<uconfig::EnvFormat, uconfig::RapidjsonForm
     virtual void Init(const std::string&) override
     {
         Register<uconfig::EnvFormat>("VECTOR", &vector);
+        Register<uconfig::EnvFormat>("VECTOR_OF_DEF", &vector_of_def);
         Register<uconfig::EnvFormat>("OPT_EMP_VECTOR", &optional_empty_vector);
         Register<uconfig::EnvFormat>("OPT_DEF_VECTOR", &optional_default_vector);
 
         Register<uconfig::RapidjsonFormat<>>("/vector", &vector);
+        Register<uconfig::RapidjsonFormat<>>("/vector_of_def", &vector_of_def);
         Register<uconfig::RapidjsonFormat<>>("/opt_emp_vector", &optional_empty_vector);
         Register<uconfig::RapidjsonFormat<>>("/opt_def_vector", &optional_default_vector);
     }
@@ -50,6 +75,7 @@ struct EnvConfigParam: public EnvFormatParam<Config>
         dst->emplace("VECTOR_0", "123");
         dst->emplace("VECTOR_1", "456");
         dst->emplace("VECTOR_2", "789");
+        dst->emplace("VECTOR_OF_DEF_0", "10000");
     }
 };
 
@@ -101,6 +127,10 @@ struct RapidjsonConfigParam: public RapidjsonFormatParam<Config>
         vector.PushBack(int(456), allocator);
         vector.PushBack(int(789), allocator);
         dst->AddMember("vector", std::move(vector), allocator);
+
+        rapidjson::Value vector_of_def{rapidjson::kArrayType};
+        vector_of_def.PushBack(int(10000), allocator);
+        dst->AddMember("vector_of_def", std::move(vector_of_def), allocator);
     }
 };
 
