@@ -58,7 +58,11 @@ public:
     virtual bool Optional() const noexcept = 0;
 };
 
-/// Interface for uconfig::Config<> objects.
+/**
+ * Interface for uconfig::Config objects.
+ *
+ * @tparam Format Format this interface interacts with.
+ */
 template <typename Format>
 class ConfigIface: public Interface<Format>
 {
@@ -73,10 +77,12 @@ public:
     /**
      * Constructor.
      *
-     * @param[in] parse_path Path to the config in terms of @p Format.
-     * @param[in] config Pointer to the uconfig::Config<> to wrap.
+     * @tparam FormatTs Type of the formats for @p config. Should include @p Format.
      *
-     * @note Does not own @p config. Should not outlive @p config.
+     * @param[in] parse_path Path to the config in terms of @p Format.
+     * @param[in] config Pointer to the uconfig::Config to wrap.
+     *
+     * @note Does not own @p config, should not outlive it.
      */
     template <typename... FormatTs>
     ConfigIface(const std::string& parse_path, Config<FormatTs...>* config);
@@ -94,7 +100,7 @@ public:
     virtual ~ConfigIface() = default;
 
     /**
-     * Parse referenced uconfig::Config<> from @p source using @p parser.
+     * Parse referenced uconfig::Config from @p source using @p parser.
      *
      * @param[in] parser Parser instance to use.
      * @param[in] source Source to parse from.
@@ -106,7 +112,7 @@ public:
     virtual bool Parse(const format_type& parser, const source_type* source, bool throw_on_fail = true) override;
 
     /**
-     * Emit referenced uconfig::Config<> to @p destination using @p emitter.
+     * Emit referenced uconfig::Config to @p destination using @p emitter.
      *
      * @param[in] emitter Emitter instance to use.
      * @param[in] dest Destination to emit into.
@@ -116,11 +122,11 @@ public:
      */
     virtual void Emit(const format_type& emitter, dest_type* dest, bool throw_on_fail = true) override;
 
-    /// Get path of the wrapped uconfig::Config<>.
+    /// Get path of the wrapped uconfig::Config.
     virtual const std::string& Path() const noexcept override;
-    /// Check if wrapped uconfig::Config<> has all mandatory values set.
+    /// Check if wrapped uconfig::Config has all mandatory values set.
     virtual bool Initialized() const noexcept override;
-    /// Check if wrapped uconfig::Config<> declared as optional.
+    /// Check if wrapped uconfig::Config declared as optional.
     virtual bool Optional() const noexcept override;
 
 private:
@@ -130,7 +136,12 @@ private:
     std::function<void()> cfg_validate_;
 };
 
-/// Interface for raw objects. Used to interface uconfig::Vector<> elements.
+/**
+ * Interface for raw values. Used to interface uconfig::Vector elements.
+ *
+ * @tparam T Type of the value.
+ * @tparam Format Format this interface interacts with.
+ */
 template <typename T, typename Format>
 class ValueIface: public Interface<Format>
 {
@@ -148,7 +159,7 @@ public:
      * @param[in] variable_path Path to the variable in terms of @p Format.
      * @param[in] value Pointer to the value to wrap.
      *
-     * @note Does not own @p value. Should not outlive @p value.
+     * @note Does not own @p value, should not outlive it.
      */
     ValueIface(const std::string& variable_path, T* value);
 
@@ -183,9 +194,9 @@ public:
      * @param[in] dest Destination to emit into.
      * @param[in] throw_on_fail Not used. Always throws if failed to emit.
      *
-     * @throws uconfig::EmitError Thrown if @p throw_on_fail.
+     * @throws uconfig::EmitError Thrown if failed.
      */
-    virtual void Emit(const format_type& emitter, dest_type* dest, bool /*throw_on_fail = true*/) override;
+    virtual void Emit(const format_type& emitter, dest_type* dest, bool throw_on_fail = true) override;
 
     /// Get path of the wrapped value.
     virtual const std::string& Path() const noexcept override;
@@ -200,7 +211,12 @@ private:
     T* value_ptr_;
 };
 
-/// Interface for uconfig::Variable<> objects.
+/**
+ * Interface for uconfig::Variable objects.
+ *
+ * @tparam T Variable wrapped type.
+ * @tparam Format Format this interface interacts with.
+ */
 template <typename T, typename Format>
 class VariableIface: public Interface<Format>
 {
@@ -218,7 +234,7 @@ public:
      * @param[in] variable_path Path to the variable in terms of @p Format.
      * @param[in] variable Pointer to the uconfig::Variable<> to wrap.
      *
-     * @note Does not own @p variable. Should not outlive @p variable.
+     * @note Does not own @p variable, should not outlive it.
      */
     VariableIface(const std::string& variable_path, Variable<T>* variable);
 
@@ -269,7 +285,12 @@ private:
     Variable<T>* variable_ptr_;
 };
 
-/// Interface for uconfig::Vector<> objects.
+/**
+ * Interface for uconfig::Vector objects.
+ *
+ * @tparam T Type of Vector elements.
+ * @tparam Format Format this interface interacts with.
+ */
 template <typename T, typename Format>
 class VectorIface: public Interface<Format>
 {
@@ -285,9 +306,9 @@ public:
      * Constructor.
      *
      * @param[in] vector_path Path to the vector in terms of @p Format.
-     * @param[in] vector Pointer to the uconfig::Vector<> to wrap.
+     * @param[in] vector Pointer to the uconfig::Vector to wrap.
      *
-     * @note Does not own @p vector. Should not outlive @p vector.
+     * @note Does not own @p vector, should not outlive it.
      */
     VectorIface(const std::string& vector_path, Vector<T>* vector);
 
@@ -304,7 +325,7 @@ public:
     virtual ~VectorIface() = default;
 
     /**
-     * Parse referenced uconfig::Vector<> from @p source using @p parser.
+     * Parse referenced uconfig::Vector from @p source using @p parser.
      *
      * @param[in] parser Parser instance to use.
      * @param[in] source Source to parse from.
@@ -316,7 +337,7 @@ public:
     virtual bool Parse(const format_type& parser, const source_type* source, bool throw_on_fail = true) override;
 
     /**
-     * Emit referenced uconfig::Vector<> to @p destination using @p emitter.
+     * Emit referenced uconfig::Vector to @p destination using @p emitter.
      *
      * @param[in] emitter Emitter instance to use.
      * @param[in] dest Destination to emit into.
@@ -326,11 +347,11 @@ public:
      */
     virtual void Emit(const format_type& emitter, dest_type* dest, bool throw_on_fail = true) override;
 
-    /// Get path of the wrapped uconfig::Vector<>.
+    /// Get path of the wrapped uconfig::Vector.
     virtual const std::string& Path() const noexcept override;
-    /// Check if wrapped uconfig::Vector<> has all mandatory values set.
+    /// Check if wrapped uconfig::Vector has all mandatory values set.
     virtual bool Initialized() const noexcept override;
-    /// Check if wrapped uconfig::Vector<> declared as optional.
+    /// Check if wrapped uconfig::Vector declared as optional.
     virtual bool Optional() const noexcept override;
 
 private:

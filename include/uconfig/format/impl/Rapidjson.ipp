@@ -19,8 +19,8 @@ std::optional<T> RapidjsonFormat<AllocatorT>::Parse(const json_value_type* sourc
 }
 
 template <typename AllocatorT>
-template <typename ValueT>
-void RapidjsonFormat<AllocatorT>::Emit(dest_type* dest, const std::string& path, const ValueT& value) const
+template <typename T>
+void RapidjsonFormat<AllocatorT>::Emit(dest_type* dest, const std::string& path, const T& value) const
 {
     Set(MakeJson(value, dest->GetAllocator()), path, dest);
 }

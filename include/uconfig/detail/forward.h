@@ -1,31 +1,33 @@
 #pragma once
 
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
 namespace uconfig {
 
-/// Forward-declared Interface.
+// Forward-declared Interface.
 template <typename Format>
 class Interface;
-/// Forward-declared ConfigIface.
+// Forward-declared ConfigIface.
 template <typename Format>
 class ConfigIface;
-/// Forward-declared VariableIface.
+// Forward-declared VariableIface.
 template <typename T, typename Format>
 class VariableIface;
-/// Forward-declared ValueIface.
+// Forward-declared ValueIface.
 template <typename T, typename Format>
 class ValueIface;
-/// Forward-declared VectorIface.
+// Forward-declared VectorIface.
 template <typename T, typename Format>
 class VectorIface;
 
-/// Forward-declared Config.
-template <typename ...FormatTs>
+// Forward-declared Config.
+template <typename... FormatTs>
 class Config;
-/// Forward-declared Variable.
+// Forward-declared Variable.
 template <typename T>
 class Variable;
-/// Forward-declared Vector.
+// Forward-declared Vector.
 template <typename T>
 class Vector;
 
 } // namespace uconfig
+#endif /* DOXYGEN_SHOULD_SKIP_THIS */
