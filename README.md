@@ -551,6 +551,7 @@ ctest -S
 
 * **CMAKE_BUILD_TYPE** - [build type](https://cmake.org/cmake/help/latest/variable/CMAKE_BUILD_TYPE.html). `RelWithDebInfo` by default.
 * **UCONFIG_BUILD_TESTING** - build included unit-tests. `OFF` by default.
+* **BUILD_DOCS** - build html (sphinx) reference docs. `OFF` by default.
 
 ## License
 

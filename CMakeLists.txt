@@ -31,6 +31,7 @@ if(NOT CMAKE_BUILD_TYPE)
 endif()
 
 option(UCONFIG_BUILD_TESTING "Build included unit-tests" OFF)
+option(BUILD_DOCS "Build sphinx generated docs" OFF)
 
 ##############################################
 # Create target and set properties
@@ -115,4 +116,11 @@ if(UCONFIG_BUILD_TESTING)
 
     include(CTest)
     add_subdirectory(tests)
+endif()
+
+##############################################
+# Docs
+
+if(BUILD_DOCS)
+    add_subdirectory(docs)
 endif()
