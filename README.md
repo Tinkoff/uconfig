@@ -548,8 +548,7 @@ ctest -S
 ### Cmake options
 
 * **CMAKE_BUILD_TYPE** - [build type](https://cmake.org/cmake/help/latest/variable/CMAKE_BUILD_TYPE.html). `RelWithDebInfo` by default.
-* **BUILD_TESTING** - [build tests or not](https://cmake.org/cmake/help/latest/module/CTest.html). `OFF` by default.
-* **UCONFIG_BUNDLED_MODE** - if the library is being built as a part of another project. Defined by `"${PROJECT_SOURCE_DIR}" == "${CMAKE_SOURCE_DIR}"` by default.
+* **BUILD_TESTING** - build included unit-tests. `OFF` by default.
 
 ## License
 
