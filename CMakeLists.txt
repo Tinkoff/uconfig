@@ -25,10 +25,6 @@ set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra")
 
-# Enable std:string and disable RAPIDJSON_ASSERT for rapidjson
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DRAPIDJSON_HAS_STDSTRING=1 \
-    \"-DRAPIDJSON_ASSERT(x)=do {} while (false)\"")
-
 ## Compile as RelWithDebInfo info by default
 if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE "RelWithDebInfo" CACHE STRING "Choose the type of build, options are: Debug Release RelWithDebInfo MinSizeRel." FORCE)
