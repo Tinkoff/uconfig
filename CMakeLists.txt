@@ -112,5 +112,5 @@ if(BUILD_TESTING)
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_CXX_FLAGS} -fprofile-arcs -ftest-coverage -lgcov")
 
     include(CTest)
-    add_subdirectory(test)
+    add_subdirectory(tests)
 endif()
