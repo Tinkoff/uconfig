@@ -1,3 +1,11 @@
+## 2.0.2 (2021-04-20)
+
+### Misc
+* Require cmake 3.0+
+* Add virtual dctor for abstract classes
+* Move test -> tests
+* Update README
+
 ## 2.0.1 (2021-03-13)
 
 ### Bug Fixes
