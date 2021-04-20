@@ -24,6 +24,9 @@ public:
     /// Destination this interface emits to.
     typedef typename Format::dest_type dest_type;
 
+    /// Destructor.
+    virtual ~Interface() = default;
+
     /**
      * Parse the @p source using @p parser.
      *

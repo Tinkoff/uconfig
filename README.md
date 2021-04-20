@@ -40,10 +40,10 @@ struct LogConfig: public uconfig::Config<uconfig::EnvFormat>
     using uconfig::Config<uconfig::EnvFormat>::Config;
 
     // Define naming scheme for variables
-    virtual void Init(const std::string& config_path) override
+    virtual void Init(const std::string& env_prefix) override
     {
-        Register<uconfig::EnvFormat>(config_path + "_FILE", &file);
-        Register<uconfig::EnvFormat>(config_path + "_ROTATE_MB", &rotate_mb);
+        Register<uconfig::EnvFormat>(env_prefix + "_FILE", &file);
+        Register<uconfig::EnvFormat>(env_prefix + "_ROTATE_MB", &rotate_mb);
     }
 };
 
@@ -54,10 +54,10 @@ struct NodeConfig: public uconfig::Config<uconfig::EnvFormat>
 
     using uconfig::Config<uconfig::EnvFormat>::Config;
 
-    virtual void Init(const std::string& config_path) override
+    virtual void Init(const std::string& env_prefix) override
     {
-        Register<uconfig::EnvFormat>(config_path + "_HOST", &host);
-        Register<uconfig::EnvFormat>(config_path + "_PORT", &port);
+        Register<uconfig::EnvFormat>(env_prefix + "_HOST", &host);
+        Register<uconfig::EnvFormat>(env_prefix + "_PORT", &port);
     }
 };
 
@@ -70,12 +70,12 @@ struct AppConfig: public uconfig::Config<uconfig::EnvFormat>
 
     using uconfig::Config<uconfig::EnvFormat>::Config;
 
-    virtual void Init(const std::string& config_path) override
+    virtual void Init(const std::string& env_prefix) override
     {
-        Register<uconfig::EnvFormat>(config_path + "_LOG", &log_config);
-        Register<uconfig::EnvFormat>(config_path + "_TIMEOUT_MS", &timeout_ms);
-        Register<uconfig::EnvFormat>(config_path + "_NODE", &nodes);
-        Register<uconfig::EnvFormat>(config_path + "_ENDPOINT", &endpoints);
+        Register<uconfig::EnvFormat>(env_prefix + "_LOG", &log_config);
+        Register<uconfig::EnvFormat>(env_prefix + "_TIMEOUT_MS", &timeout_ms);
+        Register<uconfig::EnvFormat>(env_prefix + "_NODE", &nodes);
+        Register<uconfig::EnvFormat>(env_prefix + "_ENDPOINT", &endpoints);
     }
 };
 ```
@@ -159,6 +159,8 @@ Supports:
 * `unsigned long int`
 * `long long int`
 * `unsigned long long int`
+* `float`
+* `double`
 * `std::string`
 
 **Note**:
@@ -180,6 +182,8 @@ Supports:
 * `unsigned long int`
 * `long long int`
 * `unsigned long long int`
+* `float`
+* `double`
 * `std::string`
 
 ### Nested names
@@ -189,7 +193,7 @@ By design variables naming scheme is arbitrary, meaning you are free to call `Re
 
 For example, JSON-objects have hierarchy and `uconfig::RapidjsonFormat` uses JSON-pointer for variable names, so
 ```c++
-Register<uconfig::RapidjsonFormat>("/a/b/c", &variable);
+Register<uconfig::RapidjsonFormat<>("/a/b/c", &variable);
 ```
 would tell to lookup for `variable` as the member "c" of the object "b" of the object "a":
 ```
@@ -296,7 +300,7 @@ All configuration elements can be defined as optional. For different types it is
 
 #### `uconfig::Variable`
 
-Variable considered optional if it constructed with some value:
+Variable considered optional if it is constructed with some value:
 ```c++
 uconfig::Variable<unsigned> port{8080};
 ```
@@ -368,7 +372,7 @@ It allows to specify most of the configuration parameters via bulky JSON-file an
 
 ### Custom formats
 
-To implement custom format you need to derive from `uconfig::Format` and specify/override all of it members/functions. Its' interface is self-explanatory, so:
+To implement custom format you need to derive from `uconfig::Format` and define/override all of its' functions. Its' interface is self-explanatory, so:
 ```c++
 class Format
 {
@@ -495,9 +499,9 @@ struct LogConfig: public uconfig::Config<uconfig::EnvFormat>
 
     using uconfig::Config<uconfig::EnvFormat>::Config;
 
-    virtual void Init(const std::string& config_path) override
+    virtual void Init(const std::string& env_prefix) override
     {
-        Register<uconfig::EnvFormat>(config_path + "_LEVEL", &level);
+        Register<uconfig::EnvFormat>(env_prefix + "_LEVEL", &level);
     }
 };
 ```
@@ -544,8 +548,7 @@ ctest -S
 ### Cmake options
 
 * **CMAKE_BUILD_TYPE** - [build type](https://cmake.org/cmake/help/latest/variable/CMAKE_BUILD_TYPE.html). `RelWithDebInfo` by default.
-* **BUILD_TESTING** - [build tests or not](https://cmake.org/cmake/help/latest/module/CTest.html). `OFF` by default.
-* **UCONFIG_BUNDLED_MODE** - if the library is being built as a part of another project. Defined by `"${PROJECT_SOURCE_DIR}" == "${CMAKE_SOURCE_DIR}"` by default.
+* **BUILD_TESTING** - build included unit-tests. `OFF` by default.
 
 ## License
 

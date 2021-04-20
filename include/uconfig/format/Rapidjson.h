@@ -5,6 +5,18 @@
 #include <rapidjson/document.h>
 #include <rapidjson/pointer.h>
 
+// Enable std:string for rapidjson
+#ifndef RAPIDJSON_HAS_STDSTRING
+#define RAPIDJSON_HAS_STDSTRING 1
+#endif // RAPIDJSON_HAS_STDSTRING
+
+// Disable RAPIDJSON_ASSERT for rapidjson
+#ifndef RAPIDJSON_ASSERT
+#define RAPIDJSON_ASSERT(x) \
+    do {                    \
+    } while (false)
+#endif // RAPIDJSON_ASSERT
+
 namespace uconfig {
 
 /**
