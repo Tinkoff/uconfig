@@ -30,7 +30,7 @@ if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE "RelWithDebInfo" CACHE STRING "Choose the type of build, options are: Debug Release RelWithDebInfo MinSizeRel." FORCE)
 endif()
 
-option(BUILD_TESTING "Build included unit-tests" OFF)
+option(UCONFIG_BUILD_TESTING "Build included unit-tests" OFF)
 
 ##############################################
 # Create target and set properties
@@ -102,7 +102,7 @@ export(PACKAGE ${PROJECT_NAME})
 ##############################################
 # Unit-tests
 
-if(BUILD_TESTING)
+if(UCONFIG_BUILD_TESTING)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fprofile-arcs -ftest-coverage")
     set(CMAKE_C_FLAGS "${CMAKE_CXX_FLAGS} -fprofile-arcs -ftest-coverage")
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_CXX_FLAGS} -fprofile-arcs -ftest-coverage -lgcov")
