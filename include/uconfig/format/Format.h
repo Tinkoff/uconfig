@@ -16,6 +16,9 @@ public:
     /// Destination of the format to emit to.
     using dest_type = void;
 
+    /// Destructor.
+    virtual ~Format() = default;
+
     /**
      * Parse the value at @p path from @p source.
      *

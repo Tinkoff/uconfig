@@ -34,6 +34,8 @@ class Object
 public:
     // template <typename F>
     // using iface_type;
+    
+    virtual ~Object() = default;
 
     virtual bool Initialized() const noexcept = 0;
     virtual bool Optional() const noexcept = 0;
