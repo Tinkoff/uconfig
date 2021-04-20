@@ -7,8 +7,7 @@
 # -- Project information -----------------------------------------------------
 
 project = "@PROJECT_NAME@"
-copyright = "2021, Tinkoff"
-author = "@PROJECT_AUTHOR@"
+copyright = "Apache-2.0"
 version = "@PROJECT_VERSION@"
 
 
@@ -35,10 +34,10 @@ exclude_patterns = ['build', 'Thumbs.db', '.DS_Store']
 html_theme = 'furo'
 html_theme_options = {
     "light_css_variables": {
-        "color-api-overall": "#CCCCCC",
-        "color-api-keyword": "#E62569",
-        "color-api-name": "#8EE22C",
-        "color-brand-content": "#67D8EF",
+        "color-api-overall": "#cccccc",
+        "color-api-keyword": "#e62569",
+        "color-api-name": "#8ee22c",
+        "color-brand-content": "#67d8ef",
     },
 }
 

@@ -1,15 +1,15 @@
 @PROJECT_NAME@
 ==========
 
-.. image:: https://img.shields.io/badge/language-c++17-blue.svg
+.. image:: https://img.shields.io/badge/language-c++[=cppStandart]-blue.svg
   :alt: Language C++17
   :target: https://isocpp.org
 
-.. image:: https://img.shields.io/badge/repo-uconfig-fedd2d.svg?logo=github
+.. image:: https://img.shields.io/badge/repo-@PROJECT_BADGE_NAME@-@PROJECT_BADGE_COLOR@.svg?logo=github
   :alt: Gitlab repository
-  :target: https://github.com/TinkoffCreditSystems/uconfig
+  :target: @UCONFIG_REPOSITORY_URL@
 
-C++ header-only library to parse and emit multi-format configuration for your app.
+@PROJECT_DESCRIPTION@.
 
 .. toctree::
    :maxdepth: 2

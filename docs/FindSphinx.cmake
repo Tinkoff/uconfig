@@ -50,9 +50,10 @@ _Sphinx_find_executable(quickstart)
 # Verify both executables are part of the Sphinx distribution.
 if(SPHINX_BUILD_EXECUTABLE AND SPHINX_QUICKSTART_EXECUTABLE)
     if(NOT SPHINX_BUILD_VERSION STREQUAL SPHINX_QUICKSTART_VERSION)
-        message(FATAL_ERROR "Versions for sphinx-build (${SPHINX_BUILD_VERSION})"
-                            "and sphinx-quickstart (${SPHINX_QUICKSTART_VERSION})"
-                            "do not match")
+        message(FATAL_ERROR " Versions for sphinx-build (${SPHINX_BUILD_VERSION}) "
+                            " and sphinx-quickstart (${SPHINX_QUICKSTART_VERSION}) "
+                            " do not match"
+        )
     endif()
 endif()
 
