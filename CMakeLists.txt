@@ -44,6 +44,7 @@ target_include_directories(uconfig
         $<INSTALL_INTERFACE:include>
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
 )
+target_compile_definitions(uconfig INTERFACE RAPIDJSON_HAS_STDSTRING=1)
 
 ##############################################
 # Installation instructions

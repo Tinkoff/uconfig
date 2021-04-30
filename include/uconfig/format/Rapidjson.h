@@ -2,9 +2,6 @@
 
 #include "Format.h"
 
-#include <rapidjson/document.h>
-#include <rapidjson/pointer.h>
-
 // Enable std:string for rapidjson
 #ifndef RAPIDJSON_HAS_STDSTRING
 #define RAPIDJSON_HAS_STDSTRING 1
@@ -16,6 +13,9 @@
     do {                    \
     } while (false)
 #endif // RAPIDJSON_ASSERT
+
+#include <rapidjson/document.h>
+#include <rapidjson/pointer.h>
 
 namespace uconfig {
 
