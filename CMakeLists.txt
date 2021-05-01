@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.0 FATAL_ERROR)
 
 set(UCONFIG_VERSION_MAJOR "2")
 set(UCONFIG_VERSION_MINOR "0")
-set(UCONFIG_VERSION_RELEASE "2")
+set(UCONFIG_VERSION_RELEASE "3")
 set(UCONFIG_SUMMARY "C++ library")
 set(UCONFIG_DESCRIPTION "C++ library to parse and emit multi-format configuration for your app")
 set(UCONFIG_REPOSITORY_URL "https://github.com/TinkoffCreditSystems/uconfig")

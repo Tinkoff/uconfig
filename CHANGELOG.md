@@ -1,3 +1,10 @@
+## 2.0.3 (2021-05-01)
+
+### Misc
+* Use rapidjson include folder if found
+* Append CMAKE_MODULE_PATH
+* Fix gcc 10 compile errors and warnings
+
 ## 2.0.2 (2021-04-20)
 
 ### Misc
