@@ -4,6 +4,7 @@
 
 #include <memory>
 #include <optional>
+#include <stdexcept>
 #include <typeindex>
 #include <unordered_set>
 #include <vector>
@@ -34,7 +35,7 @@ class Object
 public:
     // template <typename F>
     // using iface_type;
-    
+
     virtual ~Object() = default;
 
     virtual bool Initialized() const noexcept = 0;

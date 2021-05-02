@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.0 FATAL_ERROR)
 
 set(UCONFIG_VERSION_MAJOR "2")
 set(UCONFIG_VERSION_MINOR "0")
-set(UCONFIG_VERSION_RELEASE "2")
+set(UCONFIG_VERSION_RELEASE "3")
 set(UCONFIG_SUMMARY "C++ library")
 set(UCONFIG_DESCRIPTION "C++ library to parse and emit multi-format configuration for your app")
 set(UCONFIG_REPOSITORY_URL "https://github.com/TinkoffCreditSystems/uconfig")
@@ -11,7 +11,7 @@ set(UCONFIG_README "${CMAKE_CURRENT_SOURCE_DIR}/README.md")
 set(UCONFIG_VERSION_STRING "${UCONFIG_VERSION_MAJOR}.${UCONFIG_VERSION_MINOR}.${UCONFIG_VERSION_RELEASE}")
 
 ## Make sure that custom modules are found
-set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR})
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_CURRENT_SOURCE_DIR})
 
 project(uconfig VERSION "${UCONFIG_VERSION_STRING}" LANGUAGES CXX)
 
@@ -23,7 +23,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Wno-class-memaccess")
 
 ## Compile as RelWithDebInfo info by default
 if(NOT CMAKE_BUILD_TYPE)
@@ -44,7 +44,12 @@ target_include_directories(uconfig
         $<INSTALL_INTERFACE:include>
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
 )
-target_compile_definitions(uconfig INTERFACE RAPIDJSON_HAS_STDSTRING=1)
+
+find_package(RapidJSON)
+if (RapidJSON_FOUND)
+    target_include_directories(uconfig INTERFACE ${RapidJSON_INCLUDE_DIRS})
+    target_compile_definitions(uconfig INTERFACE RAPIDJSON_HAS_STDSTRING=1)
+endif()
 
 ##############################################
 # Installation instructions
