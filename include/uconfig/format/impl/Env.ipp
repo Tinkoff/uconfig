@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cstdlib>
+#include <limits>
 #include <sstream>
 
 namespace uconfig {
