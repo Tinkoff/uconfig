@@ -1,7 +1,11 @@
 # uconfig
 
-[![Language C++](https://img.shields.io/badge/language-c++-blue.svg)](https://isocpp.org)
-[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+[![Language C++](https://img.shields.io/badge/language-c++-blue.svg?logo=c%2B%2B)](https://isocpp.org)
+[![Github releases](https://img.shields.io/github/release/TinkoffCreditSystems/uconfig.svg)](https://github.com/Neargye/semver/releases)
+[![Conan Package](https://img.shields.io/badge/Conan-package-blueviolet)](https://conan.io/center/tcsbank-uconfig)
+[![License](https://img.shields.io/github/license/TinkoffCreditSystems/uconfig.svg)](./LICENSE)
+
+https://img.shields.io/github/languages/top/TinkoffCreditSystems/uconfig?label=c%2B%2B17&logo=c%2B%2B
 
 C++ header-only library to parse and emit **multi-format** configuration for your app. For example, you can parse JSON-file into the config and then compliment it from environment variables.
 
