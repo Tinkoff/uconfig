@@ -18,7 +18,8 @@ version = "@PROJECT_VERSION@"
 # ones.
 extensions = [
     'breathe',
-    'exhale'
+    'exhale',
+    'sphinx.ext.githubpages',
 ]
 
 # List of patterns, relative to source directory, that match files and
