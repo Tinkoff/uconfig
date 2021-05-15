@@ -25,7 +25,10 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Wno-class-memaccess")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra")
+if (NOT APPLE)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-class-memaccess")
+endif()
 
 ## Compile as RelWithDebInfo info by default
 if(NOT CMAKE_BUILD_TYPE)
@@ -39,7 +42,6 @@ option(UCONFIG_BUILD_DOCS "Build sphinx generated docs" OFF)
 # Create target and set properties
 
 set(UCONFIG_INC_DIR ${CMAKE_CURRENT_SOURCE_DIR}/include)
-set(UCONFIG_SRC_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src)
 
 add_library(${PROJECT_NAME} INTERFACE)
 add_library(${PROJECT_NAME}::${PROJECT_NAME} ALIAS ${PROJECT_NAME})
@@ -52,7 +54,7 @@ target_include_directories(${PROJECT_NAME}
 
 find_package(RapidJSON)
 if (RapidJSON_FOUND)
-    target_include_directories(${PROJECT_NAME} INTERFACE ${RapidJSON_INCLUDE_DIRS})
+    target_include_directories(${PROJECT_NAME} INTERFACE ${RapidJSON_INCLUDE_DIRS} ${RAPIDJSON_INCLUDE_DIRS})
     target_compile_definitions(${PROJECT_NAME} INTERFACE RAPIDJSON_HAS_STDSTRING=1)
 endif()
 

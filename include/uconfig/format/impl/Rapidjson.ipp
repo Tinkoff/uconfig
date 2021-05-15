@@ -12,7 +12,7 @@ std::optional<T> RapidjsonFormat<AllocatorT>::Parse(const json_value_type* sourc
     }
 
     T result;
-    if (!Convert<T>(*target, result)) {
+    if (!this->Convert<T>(*target, result)) {
         return std::nullopt;
     }
     return result;
@@ -87,7 +87,19 @@ bool RapidjsonFormat<AllocatorT>::Convert(const json_value_type& source, T& resu
 }
 
 template <typename AllocatorT>
-template <typename T, typename std::enable_if<std::is_same<T, int64_t>::value>::type*>
+template <typename T, typename std::enable_if<std::is_same<T, long>::value>::type*>
+bool RapidjsonFormat<AllocatorT>::Convert(const json_value_type& source, T& result)
+{
+    if (source.IsInt64()) {
+        result = source.GetInt64();
+        return true;
+    }
+
+    return false;
+}
+
+template <typename AllocatorT>
+template <typename T, typename std::enable_if<std::is_same<T, long long>::value>::type*>
 bool RapidjsonFormat<AllocatorT>::Convert(const json_value_type& source, T& result)
 {
     if (source.IsInt64()) {
@@ -111,7 +123,19 @@ bool RapidjsonFormat<AllocatorT>::Convert(const json_value_type& source, T& resu
 }
 
 template <typename AllocatorT>
-template <typename T, typename std::enable_if<std::is_same<T, uint64_t>::value>::type*>
+template <typename T, typename std::enable_if<std::is_same<T, unsigned long>::value>::type*>
+bool RapidjsonFormat<AllocatorT>::Convert(const json_value_type& source, T& result)
+{
+    if (source.IsUint64()) {
+        result = source.GetUint64();
+        return true;
+    }
+
+    return false;
+}
+
+template <typename AllocatorT>
+template <typename T, typename std::enable_if<std::is_same<T, unsigned long long>::value>::type*>
 bool RapidjsonFormat<AllocatorT>::Convert(const json_value_type& source, T& result)
 {
     if (source.IsUint64()) {
@@ -147,11 +171,31 @@ bool RapidjsonFormat<AllocatorT>::Convert(const json_value_type& source, T& resu
 }
 
 template <typename AllocatorT>
-template <typename SrcT, typename std::enable_if<!std::is_same<SrcT, std::string>::value>::type*>
+template <typename SrcT,
+          typename std::enable_if<std::is_same<SrcT, bool>::value || std::is_same<SrcT, int>::value ||
+                                  std::is_same<SrcT, long long>::value || std::is_same<SrcT, unsigned>::value ||
+                                  std::is_same<SrcT, unsigned long long>::value || std::is_same<SrcT, double>::value ||
+                                  std::is_same<SrcT, float>::value>::type*>
 typename RapidjsonFormat<AllocatorT>::json_value_type RapidjsonFormat<AllocatorT>::MakeJson(const SrcT& source,
                                                                                             allocator_type& /*alloc*/)
 {
     return json_value_type(source);
+}
+
+template <typename AllocatorT>
+template <typename SrcT, typename std::enable_if<std::is_same<SrcT, long>::value>::type*>
+typename RapidjsonFormat<AllocatorT>::json_value_type RapidjsonFormat<AllocatorT>::MakeJson(const SrcT& source,
+                                                                                            allocator_type& /*alloc*/)
+{
+    return json_value_type((int64_t)source);
+}
+
+template <typename AllocatorT>
+template <typename SrcT, typename std::enable_if<std::is_same<SrcT, unsigned long>::value>::type*>
+typename RapidjsonFormat<AllocatorT>::json_value_type RapidjsonFormat<AllocatorT>::MakeJson(const SrcT& source,
+                                                                                            allocator_type& /*alloc*/)
+{
+    return json_value_type((uint64_t)source);
 }
 
 template <typename AllocatorT>

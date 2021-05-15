@@ -12,8 +12,8 @@ const rapidjson::Document SetJson()
     json.AddMember("string", rapidjson::Value("value", allocator), allocator);
     json.AddMember("posinteger", (int)123, allocator);
     json.AddMember("neginteger", (int)-123, allocator);
-    json.AddMember("poslonginteger", (long int)123456789000, allocator);
-    json.AddMember("neglonginteger", (long int)-123456789000, allocator);
+    json.AddMember("poslonginteger", (int64_t)123456789000, allocator);
+    json.AddMember("neglonginteger", (int64_t)-123456789000, allocator);
     json.AddMember("posdouble", (double)123456.789, allocator);
     json.AddMember("negdouble", (double)-123456.789, allocator);
 

@@ -242,10 +242,10 @@ TYPED_TEST_P(Format, ParseAllEmit)
     ASSERT_EQ(emit_dst, test_dst);
 }
 
-REGISTER_TYPED_TEST_CASE_P(Format, ParseNoValuesEmit, ParseNoMandatoryEmit, ParseOnlyMandatoryEmit, ParseAllEmit);
+REGISTER_TYPED_TEST_SUITE_P(Format, ParseNoValuesEmit, ParseNoMandatoryEmit, ParseOnlyMandatoryEmit, ParseAllEmit);
 
 typedef ::testing::Types<EnvTypeParam<Config>, RapidjsonTypeParam<Config>> ConfigTypes;
-INSTANTIATE_TYPED_TEST_CASE_P(VectorConfig, Format, ConfigTypes);
+INSTANTIATE_TYPED_TEST_SUITE_P(VectorConfig, Format, ConfigTypes);
 
 // clang-format off
 template <>
