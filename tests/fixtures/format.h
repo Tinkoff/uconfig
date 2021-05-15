@@ -39,7 +39,7 @@ struct Format: public ::testing::Test
     static std::unique_ptr<FormatParam<TypeParam>> context;
 };
 
-TYPED_TEST_CASE_P(Format);
+TYPED_TEST_SUITE_P(Format);
 
 #include "env.h"
 #include "rapidjson.h"

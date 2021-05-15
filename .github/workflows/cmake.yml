@@ -1,0 +1,49 @@
+name: CMake
+
+on:
+  push:
+    branches: [ develop ]
+  pull_request:
+    branches: [ develop ]
+
+env:
+  BUILD_TYPE: Release
+
+jobs:
+  build:
+    name: ${{ matrix.config.name }}
+    runs-on: ${{ matrix.config.os }} # будет запускаться по очереди на всех типах машин
+    strategy:
+      fail-fast: false
+      matrix:
+        config:
+        - name: "Ubuntu Latest"
+          os: ubuntu-latest
+          # artifact: "ubuntu.7z"
+          # cc: "gcc"
+          # cxx: "g++"
+        - name: "macOS Latest"
+          os: macos-latest
+          # artifact: "macos.7z"
+          # cc: "clang"
+          # cxx: "clang++"
+
+    steps:
+    - uses: actions/checkout@v2
+    # Install dependencies
+    - name: Install dependencies on ubuntu
+      if: runner.os == 'Linux'
+      run: sudo apt-get update && sudo apt-get install -yq rapidjson-dev
+    - name: Install dependencies on macos
+      if: runner.os == 'macOS'
+      run: brew update && brew install rapidjson
+    # Configure and build
+    - name: Configure CMake
+      run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DUCONFIG_BUILD_TESTING=ON
+    - name: Build
+      run: cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}} -- -j$(nproc 2>/dev/null || sysctl -n hw.logicalcpu)
+    # Run tests
+    - name: Test
+      working-directory: ${{github.workspace}}/build
+      run: ctest -V -C ${{env.BUILD_TYPE}}
+
