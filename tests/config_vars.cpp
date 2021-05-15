@@ -77,7 +77,7 @@ struct RapidjsonConfigParam: public RapidjsonFormatParam<Config>
         auto& allocator = dst->GetAllocator();
         dst->AddMember("string", rapidjson::Value("value", allocator), allocator);
         dst->AddMember("int", (int)123, allocator);
-        dst->AddMember("longint", (long int)123456789000, allocator);
+        dst->AddMember("longint", (int64_t)123456789000, allocator);
         dst->AddMember("double", (double)123456.789, allocator);
     }
 };
@@ -182,10 +182,10 @@ TYPED_TEST_P(Format, ParseAllEmit)
     ASSERT_EQ(emit_dst, test_dst);
 }
 
-REGISTER_TYPED_TEST_CASE_P(Format, ParseNoValuesEmit, ParseNoMandatoryEmit, ParseOnlyMandatoryEmit, ParseAllEmit);
+REGISTER_TYPED_TEST_SUITE_P(Format, ParseNoValuesEmit, ParseNoMandatoryEmit, ParseOnlyMandatoryEmit, ParseAllEmit);
 
 typedef ::testing::Types<EnvTypeParam<Config>, RapidjsonTypeParam<Config>> ConfigTypes;
-INSTANTIATE_TYPED_TEST_CASE_P(VarsConfig, Format, ConfigTypes);
+INSTANTIATE_TYPED_TEST_SUITE_P(VarsConfig, Format, ConfigTypes);
 
 // clang-format off
 template <>

@@ -48,9 +48,9 @@ struct EnvFormatParam: public FormatParam<EnvTypeParam<ConfigType>>
         }
     }
 
-    virtual void EmitDefault(std::map<std::string, std::string>*) = 0;
-    virtual void EmitOptional(std::map<std::string, std::string>*) = 0;
-    virtual void EmitMandatory(std::map<std::string, std::string>*) = 0;
+    virtual void EmitDefault(std::map<std::string, std::string>*) override = 0;
+    virtual void EmitOptional(std::map<std::string, std::string>*) override = 0;
+    virtual void EmitMandatory(std::map<std::string, std::string>*) override = 0;
 
     virtual void EmitAll(std::map<std::string, std::string>* dst) override
     {

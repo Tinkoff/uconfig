@@ -16,6 +16,8 @@ struct FormatParam
     using source_type = typename format_type::source_type;
     using dest_type = typename format_type::dest_type;
 
+    virtual ~FormatParam() = default;
+
     virtual config_type Config() = 0;
     virtual source_type* Source() = 0;
     virtual void SetOptional(source_type*) = 0;
