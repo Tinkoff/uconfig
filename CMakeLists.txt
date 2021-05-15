@@ -14,8 +14,8 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_CURRENT_SOURCE_DIR})
 
 ## Declare project
 project("uconfig" LANGUAGES CXX
-                       VERSION "${UCONFIG_VERSION_STRING}"
-                       DESCRIPTION "C++ library to parse and emit multi-format configuration for your app"
+                  VERSION "${UCONFIG_VERSION_STRING}"
+                  DESCRIPTION "C++ library to parse and emit multi-format configuration for your app"
 )
 
 ##############################################
@@ -116,6 +116,7 @@ if(UCONFIG_BUILD_TESTING)
 
     add_subdirectory(tests)
 endif()
+
 
 ##############################################
 # Docs
