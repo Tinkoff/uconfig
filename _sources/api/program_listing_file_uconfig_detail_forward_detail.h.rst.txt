@@ -1,0 +1,33 @@
+
+.. _program_listing_file_uconfig_detail_forward_detail.h:
+
+Program Listing for File forward_detail.h
+=========================================
+
+|exhale_lsh| :ref:`Return to documentation for file <file_uconfig_detail_forward_detail.h>` (``uconfig/detail/forward_detail.h``)
+
+.. |exhale_lsh| unicode:: U+021B0 .. UPWARDS ARROW WITH TIP LEFTWARDS
+
+.. code-block:: cpp
+
+   #pragma once
+   
+   #include <type_traits>
+   
+   #ifndef DOXYGEN_SHOULD_SKIP_THIS
+   namespace uconfig {
+   
+   // Forward-declared operator==.
+   template <typename V, typename U, std::enable_if_t<!detail::is_base_of_template<U, Variable>::value, bool> = true>
+   bool operator==(const U& lhs, const Variable<V>& rhs);
+   template <typename V, typename U, std::enable_if_t<!detail::is_base_of_template<U, Variable>::value, bool> = true>
+   bool operator==(const Variable<V>& lhs, const U& rhs);
+   
+   // Forward-declared operator!=.
+   template <typename V, typename U, std::enable_if_t<!detail::is_base_of_template<U, Variable>::value, bool> = true>
+   bool operator!=(const U& lhs, const Variable<V>& rhs);
+   template <typename V, typename U, std::enable_if_t<!detail::is_base_of_template<U, Variable>::value, bool> = true>
+   bool operator!=(const Variable<V>& lhs, const U& rhs);
+   
+   } // namespace uconfig
+   #endif /* DOXYGEN_SHOULD_SKIP_THIS */

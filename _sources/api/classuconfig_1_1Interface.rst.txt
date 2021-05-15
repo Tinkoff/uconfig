@@ -1,0 +1,28 @@
+.. _exhale_class_classuconfig_1_1Interface:
+
+Template Class Interface
+========================
+
+- Defined in :ref:`file_uconfig_Interface.h`
+
+
+Inheritance Relationships
+-------------------------
+
+Derived Types
+*************
+
+- ``public uconfig::ConfigIface< Format >`` (:ref:`exhale_class_classuconfig_1_1ConfigIface`)
+- ``public uconfig::ValueIface< T, Format >`` (:ref:`exhale_class_classuconfig_1_1ValueIface`)
+- ``public uconfig::VariableIface< T, Format >`` (:ref:`exhale_class_classuconfig_1_1VariableIface`)
+- ``public uconfig::VectorIface< T, Format >`` (:ref:`exhale_class_classuconfig_1_1VectorIface`)
+
+
+Class Documentation
+-------------------
+
+
+.. doxygenclass:: uconfig::Interface
+   :members:
+   :protected-members:
+   :undoc-members:

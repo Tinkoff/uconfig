@@ -1,0 +1,64 @@
+
+.. _file_uconfig_Interface.h:
+
+File Interface.h
+================
+
+|exhale_lsh| :ref:`Parent directory <dir_uconfig>` (``uconfig``)
+
+.. |exhale_lsh| unicode:: U+021B0 .. UPWARDS ARROW WITH TIP LEFTWARDS
+Definition (``uconfig/Interface.h``)
+------------------------------------
+
+
+.. toctree::
+   :maxdepth: 1
+
+   program_listing_file_uconfig_Interface.h.rst
+
+
+
+
+
+Includes
+--------
+
+
+- ``Objects.h`` (:ref:`file_uconfig_Objects.h`)
+
+- ``functional``
+
+- ``impl/Interface.ipp`` (:ref:`file_uconfig_impl_Interface.ipp`)
+
+
+
+Included By
+-----------
+
+
+- :ref:`file_uconfig_uconfig.h`
+
+
+
+
+Namespaces
+----------
+
+
+- :ref:`namespace_uconfig`
+
+
+Classes
+-------
+
+
+- :ref:`exhale_class_classuconfig_1_1ConfigIface`
+
+- :ref:`exhale_class_classuconfig_1_1Interface`
+
+- :ref:`exhale_class_classuconfig_1_1ValueIface`
+
+- :ref:`exhale_class_classuconfig_1_1VariableIface`
+
+- :ref:`exhale_class_classuconfig_1_1VectorIface`
+

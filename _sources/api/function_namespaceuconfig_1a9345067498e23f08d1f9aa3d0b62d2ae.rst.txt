@@ -1,0 +1,13 @@
+.. _exhale_function_namespaceuconfig_1a9345067498e23f08d1f9aa3d0b62d2ae:
+
+Function uconfig::operator+(const Variable<std::string>&, const char \*)
+========================================================================
+
+- Defined in :ref:`file_uconfig_impl_Objects.ipp`
+
+
+Function Documentation
+----------------------
+
+
+.. doxygenfunction:: uconfig::operator+(const Variable<std::string>&, const char *)

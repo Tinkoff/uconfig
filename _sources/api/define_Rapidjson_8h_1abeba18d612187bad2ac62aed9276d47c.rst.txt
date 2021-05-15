@@ -1,0 +1,13 @@
+.. _exhale_define_Rapidjson_8h_1abeba18d612187bad2ac62aed9276d47c:
+
+Define RAPIDJSON_ASSERT
+=======================
+
+- Defined in :ref:`file_uconfig_format_Rapidjson.h`
+
+
+Define Documentation
+--------------------
+
+
+.. doxygendefine:: RAPIDJSON_ASSERT

@@ -1,0 +1,16 @@
+
+.. _program_listing_file_uconfig_uconfig.h:
+
+Program Listing for File uconfig.h
+==================================
+
+|exhale_lsh| :ref:`Return to documentation for file <file_uconfig_uconfig.h>` (``uconfig/uconfig.h``)
+
+.. |exhale_lsh| unicode:: U+021B0 .. UPWARDS ARROW WITH TIP LEFTWARDS
+
+.. code-block:: cpp
+
+   #pragma once
+   
+   #include <uconfig/Interface.h>
+   #include <uconfig/format/Format.h>

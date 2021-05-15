@@ -1,0 +1,25 @@
+.. _exhale_class_classuconfig_1_1RapidjsonFormat:
+
+Template Class RapidjsonFormat
+==============================
+
+- Defined in :ref:`file_uconfig_format_Rapidjson.h`
+
+
+Inheritance Relationships
+-------------------------
+
+Base Type
+*********
+
+- ``public uconfig::Format`` (:ref:`exhale_class_classuconfig_1_1Format`)
+
+
+Class Documentation
+-------------------
+
+
+.. doxygenclass:: uconfig::RapidjsonFormat
+   :members:
+   :protected-members:
+   :undoc-members:

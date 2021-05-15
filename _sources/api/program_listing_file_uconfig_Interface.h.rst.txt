@@ -1,0 +1,166 @@
+
+.. _program_listing_file_uconfig_Interface.h:
+
+Program Listing for File Interface.h
+====================================
+
+|exhale_lsh| :ref:`Return to documentation for file <file_uconfig_Interface.h>` (``uconfig/Interface.h``)
+
+.. |exhale_lsh| unicode:: U+021B0 .. UPWARDS ARROW WITH TIP LEFTWARDS
+
+.. code-block:: cpp
+
+   #pragma once
+   
+   #include "Objects.h"
+   
+   #include <functional>
+   
+   namespace uconfig {
+   
+   template <typename Format>
+   class Interface
+   {
+   public:
+       typedef Format format_type;
+       typedef typename Format::source_type source_type;
+       typedef typename Format::dest_type dest_type;
+   
+       virtual ~Interface() = default;
+   
+       virtual bool Parse(const format_type& parser, const source_type* source, bool throw_on_fail) = 0;
+   
+       virtual void Emit(const format_type& emitter, dest_type* dest, bool throw_on_fail) = 0;
+   
+       virtual const std::string& Path() const noexcept = 0;
+       virtual bool Initialized() const noexcept = 0;
+       virtual bool Optional() const noexcept = 0;
+   };
+   
+   template <typename Format>
+   class ConfigIface: public Interface<Format>
+   {
+   public:
+       using typename Interface<Format>::format_type;
+       using typename Interface<Format>::source_type;
+       using typename Interface<Format>::dest_type;
+   
+       template <typename... FormatTs>
+       ConfigIface(const std::string& parse_path, Config<FormatTs...>* config);
+   
+       ConfigIface(const ConfigIface<Format>&) = default;
+       ConfigIface<Format>& operator=(const ConfigIface<Format>&) = default;
+       ConfigIface(ConfigIface<Format>&&) noexcept = default;
+       ConfigIface<Format>& operator=(ConfigIface<Format>&&) noexcept = default;
+   
+       virtual ~ConfigIface() = default;
+   
+       virtual bool Parse(const format_type& parser, const source_type* source, bool throw_on_fail = true) override;
+   
+       virtual void Emit(const format_type& emitter, dest_type* dest, bool throw_on_fail = true) override;
+   
+       virtual const std::string& Path() const noexcept override;
+       virtual bool Initialized() const noexcept override;
+       virtual bool Optional() const noexcept override;
+   
+   private:
+       std::string path_;
+       bool cfg_optional_;
+       std::vector<std::unique_ptr<Interface<format_type>>>* cfg_interfaces_;
+       std::function<void()> cfg_validate_;
+   };
+   
+   template <typename T, typename Format>
+   class ValueIface: public Interface<Format>
+   {
+   public:
+       using typename Interface<Format>::format_type;
+       using typename Interface<Format>::source_type;
+       using typename Interface<Format>::dest_type;
+   
+       ValueIface(const std::string& variable_path, T* value);
+   
+       ValueIface(const ValueIface<T, Format>&) = default;
+       ValueIface<T, Format>& operator=(const ValueIface<T, Format>&) = default;
+       ValueIface(ValueIface<T, Format>&&) noexcept = default;
+       ValueIface<T, Format>& operator=(ValueIface<T, Format>&&) noexcept = default;
+   
+       virtual ~ValueIface() = default;
+   
+       virtual bool Parse(const format_type& parser, const source_type* source, bool throw_on_fail = true) override;
+   
+       virtual void Emit(const format_type& emitter, dest_type* dest, bool throw_on_fail = true) override;
+   
+       virtual const std::string& Path() const noexcept override;
+       virtual bool Initialized() const noexcept override;
+       virtual bool Optional() const noexcept override;
+   
+   private:
+       std::string path_;
+       bool initialized_;
+       T* value_ptr_;
+   };
+   
+   template <typename T, typename Format>
+   class VariableIface: public Interface<Format>
+   {
+   public:
+       using typename Interface<Format>::format_type;
+       using typename Interface<Format>::source_type;
+       using typename Interface<Format>::dest_type;
+   
+       VariableIface(const std::string& variable_path, Variable<T>* variable);
+   
+       VariableIface(const VariableIface<T, Format>&) = default;
+       VariableIface<T, Format>& operator=(const VariableIface<T, Format>&) = default;
+       VariableIface(VariableIface<T, Format>&&) noexcept = default;
+       VariableIface<T, Format>& operator=(VariableIface<T, Format>&&) noexcept = default;
+   
+       virtual ~VariableIface() = default;
+   
+       virtual bool Parse(const format_type& parser, const source_type* source, bool throw_on_fail = true) override;
+   
+       virtual void Emit(const format_type& emitter, dest_type* dest, bool throw_on_fail = true) override;
+   
+       virtual const std::string& Path() const noexcept override;
+       virtual bool Initialized() const noexcept override;
+       virtual bool Optional() const noexcept override;
+   
+   private:
+       std::string path_;
+       Variable<T>* variable_ptr_;
+   };
+   
+   template <typename T, typename Format>
+   class VectorIface: public Interface<Format>
+   {
+   public:
+       using typename Interface<Format>::format_type;
+       using typename Interface<Format>::source_type;
+       using typename Interface<Format>::dest_type;
+   
+       VectorIface(const std::string& vector_path, Vector<T>* vector);
+   
+       VectorIface(const VectorIface<T, Format>&) = default;
+       VectorIface<T, Format>& operator=(const VectorIface<T, Format>&) = default;
+       VectorIface(VectorIface<T, Format>&&) noexcept = default;
+       VectorIface<T, Format>& operator=(VectorIface<T, Format>&&) noexcept = default;
+   
+       virtual ~VectorIface() = default;
+   
+       virtual bool Parse(const format_type& parser, const source_type* source, bool throw_on_fail = true) override;
+   
+       virtual void Emit(const format_type& emitter, dest_type* dest, bool throw_on_fail = true) override;
+   
+       virtual const std::string& Path() const noexcept override;
+       virtual bool Initialized() const noexcept override;
+       virtual bool Optional() const noexcept override;
+   
+   private:
+       std::string path_;
+       Vector<T>* vector_ptr_;
+   };
+   
+   } // namespace uconfig
+   
+   #include "impl/Interface.ipp"

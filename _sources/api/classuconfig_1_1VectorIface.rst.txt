@@ -1,0 +1,25 @@
+.. _exhale_class_classuconfig_1_1VectorIface:
+
+Template Class VectorIface
+==========================
+
+- Defined in :ref:`file_uconfig_Interface.h`
+
+
+Inheritance Relationships
+-------------------------
+
+Base Type
+*********
+
+- ``public uconfig::Interface< Format >`` (:ref:`exhale_class_classuconfig_1_1Interface`)
+
+
+Class Documentation
+-------------------
+
+
+.. doxygenclass:: uconfig::VectorIface
+   :members:
+   :protected-members:
+   :undoc-members:

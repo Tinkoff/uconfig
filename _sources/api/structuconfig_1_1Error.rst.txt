@@ -1,0 +1,32 @@
+.. _exhale_struct_structuconfig_1_1Error:
+
+Struct Error
+============
+
+- Defined in :ref:`file_uconfig_Objects.h`
+
+
+Inheritance Relationships
+-------------------------
+
+Base Type
+*********
+
+- ``public runtime_error``
+
+
+Derived Types
+*************
+
+- ``public uconfig::EmitError`` (:ref:`exhale_struct_structuconfig_1_1EmitError`)
+- ``public uconfig::ParseError`` (:ref:`exhale_struct_structuconfig_1_1ParseError`)
+
+
+Struct Documentation
+--------------------
+
+
+.. doxygenstruct:: uconfig::Error
+   :members:
+   :protected-members:
+   :undoc-members:

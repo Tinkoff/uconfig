@@ -1,0 +1,13 @@
+.. _exhale_function_namespaceuconfig_1adba6d13b5da0c9e9b5797c628ceceb23:
+
+Template Function uconfig::operator==(const std::vector<V>&, const Vector<Variable<V>>&)
+========================================================================================
+
+- Defined in :ref:`file_uconfig_impl_Objects.ipp`
+
+
+Function Documentation
+----------------------
+
+
+.. doxygenfunction:: uconfig::operator==(const std::vector<V>&, const Vector<Variable<V>>&)

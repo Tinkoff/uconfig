@@ -1,0 +1,46 @@
+
+.. _program_listing_file_uconfig_format_Env.h:
+
+Program Listing for File Env.h
+==============================
+
+|exhale_lsh| :ref:`Return to documentation for file <file_uconfig_format_Env.h>` (``uconfig/format/Env.h``)
+
+.. |exhale_lsh| unicode:: U+021B0 .. UPWARDS ARROW WITH TIP LEFTWARDS
+
+.. code-block:: cpp
+
+   #pragma once
+   
+   #include "Format.h"
+   
+   #include <map>
+   
+   namespace uconfig {
+   
+   class EnvFormat: public Format
+   {
+   public:
+       static inline const std::string name = "[ENV]";
+       using source_type = void;
+       using dest_type = std::map<std::string, std::string>;
+   
+       template <typename T>
+       std::optional<T> Parse(const source_type* /*unused*/, const std::string& path) const;
+   
+       template <typename T>
+       void Emit(dest_type* dest, const std::string& path, const T& value) const;
+   
+       virtual std::string VectorElementPath(const std::string& vector_path, std::size_t index) const noexcept override;
+   
+   private:
+       template <typename T>
+       static std::optional<T> FromString(const std::string& str);
+   
+       template <typename T>
+       static std::string ToString(const T& value);
+   };
+   
+   } // namespace uconfig
+   
+   #include "impl/Env.ipp"

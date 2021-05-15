@@ -1,0 +1,25 @@
+.. _exhale_class_classuconfig_1_1Vector:
+
+Template Class Vector
+=====================
+
+- Defined in :ref:`file_uconfig_Objects.h`
+
+
+Inheritance Relationships
+-------------------------
+
+Base Type
+*********
+
+- ``public uconfig::Variable< std::vector< T > >`` (:ref:`exhale_class_classuconfig_1_1Variable`)
+
+
+Class Documentation
+-------------------
+
+
+.. doxygenclass:: uconfig::Vector
+   :members:
+   :protected-members:
+   :undoc-members:

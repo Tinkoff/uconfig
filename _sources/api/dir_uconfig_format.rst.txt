@@ -1,0 +1,27 @@
+.. _dir_uconfig_format:
+
+
+Directory format
+================
+
+
+|exhale_lsh| :ref:`Parent directory <dir_uconfig>` (``uconfig``)
+
+.. |exhale_lsh| unicode:: U+021B0 .. UPWARDS ARROW WITH TIP LEFTWARDS
+
+*Directory path:* ``uconfig/format``
+
+Subdirectories
+--------------
+
+- :ref:`dir_uconfig_format_impl`
+
+
+Files
+-----
+
+- :ref:`file_uconfig_format_Env.h`
+- :ref:`file_uconfig_format_Format.h`
+- :ref:`file_uconfig_format_Rapidjson.h`
+
+

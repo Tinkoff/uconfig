@@ -1,0 +1,27 @@
+.. _exhale_class_classuconfig_1_1Object:
+
+Class Object
+============
+
+- Defined in :ref:`file_uconfig_Objects.h`
+
+
+Inheritance Relationships
+-------------------------
+
+Derived Types
+*************
+
+- ``public uconfig::Config< FormatTs >`` (:ref:`exhale_class_classuconfig_1_1Config`)
+- ``public uconfig::Variable< T >`` (:ref:`exhale_class_classuconfig_1_1Variable`)
+- ``public uconfig::Variable< std::vector< T > >`` (:ref:`exhale_class_classuconfig_1_1Variable`)
+
+
+Class Documentation
+-------------------
+
+
+.. doxygenclass:: uconfig::Object
+   :members:
+   :protected-members:
+   :undoc-members:

@@ -1,0 +1,25 @@
+.. _exhale_struct_structuconfig_1_1EmitError:
+
+Struct EmitError
+================
+
+- Defined in :ref:`file_uconfig_Objects.h`
+
+
+Inheritance Relationships
+-------------------------
+
+Base Type
+*********
+
+- ``public uconfig::Error`` (:ref:`exhale_struct_structuconfig_1_1Error`)
+
+
+Struct Documentation
+--------------------
+
+
+.. doxygenstruct:: uconfig::EmitError
+   :members:
+   :protected-members:
+   :undoc-members:

@@ -1,0 +1,26 @@
+.. _exhale_class_classuconfig_1_1Format:
+
+Class Format
+============
+
+- Defined in :ref:`file_uconfig_format_Format.h`
+
+
+Inheritance Relationships
+-------------------------
+
+Derived Types
+*************
+
+- ``public uconfig::EnvFormat`` (:ref:`exhale_class_classuconfig_1_1EnvFormat`)
+- ``public uconfig::RapidjsonFormat< AllocatorT >`` (:ref:`exhale_class_classuconfig_1_1RapidjsonFormat`)
+
+
+Class Documentation
+-------------------
+
+
+.. doxygenclass:: uconfig::Format
+   :members:
+   :protected-members:
+   :undoc-members:

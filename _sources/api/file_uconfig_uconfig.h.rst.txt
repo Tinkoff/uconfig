@@ -1,0 +1,34 @@
+
+.. _file_uconfig_uconfig.h:
+
+File uconfig.h
+==============
+
+|exhale_lsh| :ref:`Parent directory <dir_uconfig>` (``uconfig``)
+
+.. |exhale_lsh| unicode:: U+021B0 .. UPWARDS ARROW WITH TIP LEFTWARDS
+Definition (``uconfig/uconfig.h``)
+----------------------------------
+
+
+.. toctree::
+   :maxdepth: 1
+
+   program_listing_file_uconfig_uconfig.h.rst
+
+
+
+
+
+Includes
+--------
+
+
+- ``uconfig/Interface.h`` (:ref:`file_uconfig_Interface.h`)
+
+- ``uconfig/format/Format.h`` (:ref:`file_uconfig_format_Format.h`)
+
+
+
+
+

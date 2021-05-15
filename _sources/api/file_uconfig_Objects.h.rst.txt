@@ -1,0 +1,78 @@
+
+.. _file_uconfig_Objects.h:
+
+File Objects.h
+==============
+
+|exhale_lsh| :ref:`Parent directory <dir_uconfig>` (``uconfig``)
+
+.. |exhale_lsh| unicode:: U+021B0 .. UPWARDS ARROW WITH TIP LEFTWARDS
+Definition (``uconfig/Objects.h``)
+----------------------------------
+
+
+.. toctree::
+   :maxdepth: 1
+
+   program_listing_file_uconfig_Objects.h.rst
+
+
+
+
+
+Includes
+--------
+
+
+- ``detail/detail.h`` (:ref:`file_uconfig_detail_detail.h`)
+
+- ``impl/Objects.ipp`` (:ref:`file_uconfig_impl_Objects.ipp`)
+
+- ``memory``
+
+- ``optional``
+
+- ``stdexcept``
+
+- ``typeindex``
+
+- ``unordered_set``
+
+- ``vector``
+
+
+
+Included By
+-----------
+
+
+- :ref:`file_uconfig_Interface.h`
+
+
+
+
+Namespaces
+----------
+
+
+- :ref:`namespace_uconfig`
+
+
+Classes
+-------
+
+
+- :ref:`exhale_struct_structuconfig_1_1EmitError`
+
+- :ref:`exhale_struct_structuconfig_1_1Error`
+
+- :ref:`exhale_struct_structuconfig_1_1ParseError`
+
+- :ref:`exhale_class_classuconfig_1_1Config`
+
+- :ref:`exhale_class_classuconfig_1_1Object`
+
+- :ref:`exhale_class_classuconfig_1_1Variable`
+
+- :ref:`exhale_class_classuconfig_1_1Vector`
+

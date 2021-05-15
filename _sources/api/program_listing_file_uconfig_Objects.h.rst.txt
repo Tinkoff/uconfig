@@ -1,0 +1,229 @@
+
+.. _program_listing_file_uconfig_Objects.h:
+
+Program Listing for File Objects.h
+==================================
+
+|exhale_lsh| :ref:`Return to documentation for file <file_uconfig_Objects.h>` (``uconfig/Objects.h``)
+
+.. |exhale_lsh| unicode:: U+021B0 .. UPWARDS ARROW WITH TIP LEFTWARDS
+
+.. code-block:: cpp
+
+   #pragma once
+   
+   #include "detail/detail.h"
+   
+   #include <memory>
+   #include <optional>
+   #include <stdexcept>
+   #include <typeindex>
+   #include <unordered_set>
+   #include <vector>
+   
+   namespace uconfig {
+   
+   struct Error: public std::runtime_error
+   {
+       using std::runtime_error::runtime_error;
+   };
+   
+   struct ParseError: public Error
+   {
+       using Error::Error;
+   };
+   
+   struct EmitError: public Error
+   {
+       using Error::Error;
+   };
+   
+   class Object
+   {
+   public:
+       // template <typename F>
+       // using iface_type;
+   
+       virtual ~Object() = default;
+   
+       virtual bool Initialized() const noexcept = 0;
+       virtual bool Optional() const noexcept = 0;
+       virtual void Validate() const {};
+   };
+   
+   template <typename... FormatTs>
+   class Config: public Object
+   {
+   public:
+       template <typename F>
+       using iface_type = ConfigIface<F>;
+   
+       template <typename F>
+       friend class ConfigIface;
+   
+       Config(bool optional = false);
+   
+       Config(const Config<FormatTs...>& other);
+       Config<FormatTs...>& operator=(const Config<FormatTs...>& other);
+       Config(Config<FormatTs...>&& other) noexcept;
+       Config<FormatTs...>& operator=(Config<FormatTs...>&& other) noexcept;
+   
+       virtual ~Config() = default;
+   
+       template <typename F>
+       bool Parse(const F& parser, const std::string& path, const typename F::source_type* source,
+                  bool throw_on_fail = true);
+   
+       template <typename F>
+       void Emit(const F& emitter, const std::string& path, typename F::dest_type* destination, bool throw_on_fail = true);
+   
+       virtual bool Initialized() const noexcept override;
+   
+       virtual bool Optional() const noexcept override;
+   
+   protected:
+       virtual void Init(const std::string& config_path) = 0;
+   
+       template <typename F, typename T>
+       void Register(const std::string& element_path, T* element) noexcept;
+   
+   private:
+       void Reset() noexcept;
+   
+       template <typename F>
+       void SetFormat() noexcept;
+   
+       template <typename F>
+       std::vector<std::unique_ptr<Interface<F>>>& Interfaces() noexcept;
+   
+   private:
+       bool optional_ = false;
+       std::unordered_set<Object*> elements_;
+       std::unordered_set<std::type_index> register_formats_;
+       std::tuple<std::vector<std::unique_ptr<Interface<FormatTs>>>...> interfaces_;
+   };
+   
+   template <typename T>
+   class Variable: public Object
+   {
+   public:
+       template <typename F>
+       using iface_type = VariableIface<T, F>;
+   
+       template <typename U, typename F>
+       friend class VariableIface;
+   
+       Variable();
+       Variable(T&& init_value);
+       Variable(const T& init_value);
+   
+       Variable(const Variable<T>&) = default;
+       Variable<T>& operator=(const Variable<T>&) = default;
+       Variable(Variable<T>&& other) noexcept = default;
+       Variable<T>& operator=(Variable<T>&& other) noexcept = default;
+       Variable<T>& operator=(T&& other) noexcept;
+   
+       virtual ~Variable() = default;
+   
+       virtual bool Initialized() const noexcept override;
+   
+       virtual bool Optional() const noexcept override;
+   
+       T& Get();
+   
+       const T& Get() const;
+   
+       T& operator*();
+   
+       const T& operator*() const;
+   
+       T* operator->();
+   
+       const T* operator->() const;
+   
+       explicit operator T&();
+   
+       explicit operator const T&() const;
+   
+   #ifndef DOXYGEN_SHOULD_SKIP_THIS
+       /* enable left and right-handed comparisons */
+   
+       template <typename V, typename U>
+       friend bool operator==(const Variable<V>& lhs, const Variable<U>& rhs);
+       template <typename V, typename U, std::enable_if_t<!detail::is_base_of_template<U, Variable>::value, bool>>
+       friend bool operator==(const U& lhs, const Variable<V>& rhs);
+       template <typename V, typename U, std::enable_if_t<!detail::is_base_of_template<U, Variable>::value, bool>>
+       friend bool operator==(const Variable<V>& lhs, const U& rhs);
+   
+       template <typename V, typename U>
+       friend bool operator!=(const Variable<V>& lhs, const Variable<U>& rhs);
+       template <typename V, typename U, std::enable_if_t<!detail::is_base_of_template<U, Variable>::value, bool>>
+       friend bool operator!=(const U& lhs, const Variable<V>& rhs);
+       template <typename V, typename U, std::enable_if_t<!detail::is_base_of_template<U, Variable>::value, bool>>
+       friend bool operator!=(const Variable<V>& lhs, const U& rhs);
+   
+       template <typename V, typename U>
+       friend bool operator>(const U& lhs, const Variable<V>& rhs);
+       template <typename V, typename U>
+       friend bool operator>(const Variable<V>& lhs, const U& rhs);
+   
+       template <typename V, typename U>
+       friend bool operator<(const U& lhs, const Variable<V>& rhs);
+       template <typename V, typename U>
+       friend bool operator<(const Variable<V>& lhs, const U& rhs);
+   
+       template <typename V, typename U>
+       friend bool operator>=(const U& lhs, const Variable<V>& rhs);
+       template <typename V, typename U>
+       friend bool operator>=(const Variable<V>& lhs, const U& rhs);
+   
+       template <typename V, typename U>
+       friend bool operator<=(const U& lhs, const Variable<V>& rhs);
+       template <typename V, typename U>
+       friend bool operator<=(const Variable<V>& lhs, const U& rhs);
+   
+   #endif /* DOXYGEN_SHOULD_SKIP_THIS */
+   
+   protected:
+       bool optional_ = false;
+       std::optional<T> value_ = std::nullopt; 
+   };
+   
+   template <typename T>
+   class Vector: public Variable<std::vector<T>>
+   {
+   public:
+       template <typename F>
+       using iface_type = VectorIface<T, F>;
+   
+       template <typename U, typename F>
+       friend class VectorIface;
+   
+       Vector(bool optional = false);
+       Vector(std::vector<T>&& init_value);
+       Vector(const std::vector<T>& init_value);
+   
+       Vector(const Vector<T>&) = default;
+       Vector<T>& operator=(const Vector<T>&) = default;
+       Vector(Vector<T>&& other) noexcept = default;
+       Vector<T>& operator=(Vector<T>&& other) noexcept = default;
+       Vector<T>& operator=(std::vector<T>&& vector) noexcept;
+   
+       virtual ~Vector() = default;
+   
+       T& operator[](std::size_t pos);
+   
+       const T& operator[](std::size_t pos) const;
+   
+   #ifndef DOXYGEN_SHOULD_SKIP_THIS
+   
+       // operator== for Vector<Variable<V>> and std::vector<V>.
+       template <typename V>
+       friend bool operator==(const Vector<Variable<V>>& lhs, const std::vector<V>& rhs);
+   
+   #endif /* DOXYGEN_SHOULD_SKIP_THIS */
+   };
+   
+   } // namespace uconfig
+   
+   #include "impl/Objects.ipp"

@@ -1,0 +1,22 @@
+.. _dir_uconfig_detail:
+
+
+Directory detail
+================
+
+
+|exhale_lsh| :ref:`Parent directory <dir_uconfig>` (``uconfig``)
+
+.. |exhale_lsh| unicode:: U+021B0 .. UPWARDS ARROW WITH TIP LEFTWARDS
+
+*Directory path:* ``uconfig/detail``
+
+
+Files
+-----
+
+- :ref:`file_uconfig_detail_detail.h`
+- :ref:`file_uconfig_detail_forward.h`
+- :ref:`file_uconfig_detail_forward_detail.h`
+
+

@@ -1,0 +1,13 @@
+.. _exhale_function_namespaceuconfig_1a101e4332206e55027802b80e3a52b0f8:
+
+Template Function uconfig::operator==(const Variable<V>&, const U&)
+===================================================================
+
+- Defined in :ref:`file_uconfig_impl_Objects.ipp`
+
+
+Function Documentation
+----------------------
+
+
+.. doxygenfunction:: uconfig::operator==(const Variable<V>&, const U&)

@@ -1,0 +1,38 @@
+
+.. _program_listing_file_uconfig_format_Format.h:
+
+Program Listing for File Format.h
+=================================
+
+|exhale_lsh| :ref:`Return to documentation for file <file_uconfig_format_Format.h>` (``uconfig/format/Format.h``)
+
+.. |exhale_lsh| unicode:: U+021B0 .. UPWARDS ARROW WITH TIP LEFTWARDS
+
+.. code-block:: cpp
+
+   #pragma once
+   
+   #include <optional>
+   #include <string>
+   
+   namespace uconfig {
+   
+   class Format
+   {
+   public:
+       static inline const std::string name = "[NO FORMAT]";
+       using source_type = void;
+       using dest_type = void;
+   
+       virtual ~Format() = default;
+   
+       template <typename T>
+       std::optional<T> Parse(const source_type* source, const std::string& path) const;
+   
+       template <typename T>
+       void Emit(dest_type* dest, const std::string& path, const T& value) const;
+   
+       virtual std::string VectorElementPath(const std::string& vector_path, std::size_t index) const noexcept = 0;
+   };
+   
+   } // namespace uconfig

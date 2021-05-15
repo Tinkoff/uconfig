@@ -1,0 +1,13 @@
+.. _exhale_define_Rapidjson_8h_1a2f2eef0ee4477f3fe5874703a66e997f:
+
+Define RAPIDJSON_HAS_STDSTRING
+==============================
+
+- Defined in :ref:`file_uconfig_format_Rapidjson.h`
+
+
+Define Documentation
+--------------------
+
+
+.. doxygendefine:: RAPIDJSON_HAS_STDSTRING

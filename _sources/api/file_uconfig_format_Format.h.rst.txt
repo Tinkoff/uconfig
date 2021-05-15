@@ -1,0 +1,58 @@
+
+.. _file_uconfig_format_Format.h:
+
+File Format.h
+=============
+
+|exhale_lsh| :ref:`Parent directory <dir_uconfig_format>` (``uconfig/format``)
+
+.. |exhale_lsh| unicode:: U+021B0 .. UPWARDS ARROW WITH TIP LEFTWARDS
+Definition (``uconfig/format/Format.h``)
+----------------------------------------
+
+
+.. toctree::
+   :maxdepth: 1
+
+   program_listing_file_uconfig_format_Format.h.rst
+
+
+
+
+
+Includes
+--------
+
+
+- ``optional``
+
+- ``string``
+
+
+
+Included By
+-----------
+
+
+- :ref:`file_uconfig_format_Env.h`
+
+- :ref:`file_uconfig_format_Rapidjson.h`
+
+- :ref:`file_uconfig_uconfig.h`
+
+
+
+
+Namespaces
+----------
+
+
+- :ref:`namespace_uconfig`
+
+
+Classes
+-------
+
+
+- :ref:`exhale_class_classuconfig_1_1Format`
+

@@ -1,0 +1,100 @@
+
+.. _program_listing_file_uconfig_format_Rapidjson.h:
+
+Program Listing for File Rapidjson.h
+====================================
+
+|exhale_lsh| :ref:`Return to documentation for file <file_uconfig_format_Rapidjson.h>` (``uconfig/format/Rapidjson.h``)
+
+.. |exhale_lsh| unicode:: U+021B0 .. UPWARDS ARROW WITH TIP LEFTWARDS
+
+.. code-block:: cpp
+
+   #pragma once
+   
+   #include "Format.h"
+   
+   // Enable std:string for rapidjson
+   #ifndef RAPIDJSON_HAS_STDSTRING
+   #define RAPIDJSON_HAS_STDSTRING 1
+   #endif // RAPIDJSON_HAS_STDSTRING
+   
+   // Disable RAPIDJSON_ASSERT for rapidjson
+   #ifndef RAPIDJSON_ASSERT
+   #define RAPIDJSON_ASSERT(x) \
+       do {                    \
+       } while (false)
+   #endif // RAPIDJSON_ASSERT
+   
+   #include <rapidjson/document.h>
+   #include <rapidjson/pointer.h>
+   
+   namespace uconfig {
+   
+   template <typename AllocatorT = rapidjson::MemoryPoolAllocator<>>
+   class RapidjsonFormat: public Format
+   {
+   public:
+       static inline const std::string name = "[JSON]";
+   
+       using allocator_type = AllocatorT;
+       using json_doc_type = rapidjson::GenericDocument<rapidjson::UTF8<>, allocator_type>;
+       using json_value_type = rapidjson::GenericValue<rapidjson::UTF8<>, allocator_type>;
+       using json_pointer_type = rapidjson::GenericPointer<json_value_type, allocator_type>;
+       using source_type = json_value_type;
+       using dest_type = json_doc_type;
+   
+       template <typename T>
+       std::optional<T> Parse(const json_value_type* source, const std::string& path) const;
+   
+       template <typename T>
+       void Emit(dest_type* dest, const std::string& path, const T& value) const;
+   
+       virtual std::string VectorElementPath(const std::string& vector_path, std::size_t index) const noexcept override;
+   
+   private:
+       static const json_value_type* Get(const json_value_type* source, const std::string& path);
+       static void Set(json_value_type&& value, const std::string& path, dest_type* dest);
+   
+       template <typename T, typename std::enable_if<std::is_same<T, std::string>::value>::type* = nullptr>
+       static bool Convert(const json_value_type& source, T& result);
+       template <typename T, typename std::enable_if<std::is_same<T, bool>::value>::type* = nullptr>
+       static bool Convert(const json_value_type& source, T& result);
+       template <typename T, typename std::enable_if<std::is_same<T, int>::value>::type* = nullptr>
+       static bool Convert(const json_value_type& source, T& result);
+       template <typename T, typename std::enable_if<std::is_same<T, long>::value>::type* = nullptr>
+       static bool Convert(const json_value_type& source, T& result);
+       template <typename T, typename std::enable_if<std::is_same<T, long long>::value>::type* = nullptr>
+       static bool Convert(const json_value_type& source, T& result);
+       template <typename T, typename std::enable_if<std::is_same<T, unsigned>::value>::type* = nullptr>
+       static bool Convert(const json_value_type& source, T& result);
+       template <typename T, typename std::enable_if<std::is_same<T, unsigned long>::value>::type* = nullptr>
+       static bool Convert(const json_value_type& source, T& result);
+       template <typename T, typename std::enable_if<std::is_same<T, unsigned long long>::value>::type* = nullptr>
+       static bool Convert(const json_value_type& source, T& result);
+       template <typename T, typename std::enable_if<std::is_same<T, double>::value>::type* = nullptr>
+       static bool Convert(const json_value_type& source, T& result);
+       template <typename T, typename std::enable_if<std::is_same<T, float>::value>::type* = nullptr>
+       static bool Convert(const json_value_type& source, T& result);
+   
+       // Helper to make a JSON-value from SrcT.
+       template <typename SrcT, typename std::enable_if<
+                                    std::is_same<SrcT, bool>::value || std::is_same<SrcT, int>::value ||
+                                    std::is_same<SrcT, long long>::value || std::is_same<SrcT, unsigned>::value ||
+                                    std::is_same<SrcT, unsigned long long>::value || std::is_same<SrcT, double>::value ||
+                                    std::is_same<SrcT, float>::value>::type* = nullptr>
+       static json_value_type MakeJson(const SrcT& source, allocator_type& alloc);
+       // Helper to make a JSON-value from SrcT.
+       template <typename SrcT, typename std::enable_if<std::is_same<SrcT, long>::value>::type* = nullptr>
+       static json_value_type MakeJson(const SrcT& source, allocator_type& alloc);
+       // Helper to make a JSON-value from SrcT.
+       template <typename SrcT, typename std::enable_if<std::is_same<SrcT, unsigned long>::value>::type* = nullptr>
+       static json_value_type MakeJson(const SrcT& source, allocator_type& alloc);
+       // Helper to make a JSON-value from SrcT.
+       template <typename SrcT, typename std::enable_if<std::is_same<SrcT, std::string>::value>::type* = nullptr>
+       static json_value_type MakeJson(const SrcT& source, allocator_type& alloc);
+   };
+   
+   } // namespace uconfig
+   
+   #include "impl/Rapidjson.ipp"

@@ -1,0 +1,39 @@
+
+.. _file_uconfig_impl_Interface.ipp:
+
+File Interface.ipp
+==================
+
+|exhale_lsh| :ref:`Parent directory <dir_uconfig_impl>` (``uconfig/impl``)
+
+.. |exhale_lsh| unicode:: U+021B0 .. UPWARDS ARROW WITH TIP LEFTWARDS
+Definition (``uconfig/impl/Interface.ipp``)
+-------------------------------------------
+
+
+.. toctree::
+   :maxdepth: 1
+
+   program_listing_file_uconfig_impl_Interface.ipp.rst
+
+
+
+
+
+
+
+Included By
+-----------
+
+
+- :ref:`file_uconfig_Interface.h`
+
+
+
+
+Namespaces
+----------
+
+
+- :ref:`namespace_uconfig`
+
