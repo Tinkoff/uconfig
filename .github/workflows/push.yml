@@ -1,4 +1,4 @@
-name: CMake
+name: Publish develop
 
 on:
   push:
@@ -6,7 +6,6 @@ on:
 
 jobs:
   coverage:
-    needs: build-n-test
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
