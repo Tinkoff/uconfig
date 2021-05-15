@@ -43,9 +43,9 @@ struct RapidjsonFormatParam: public FormatParam<RapidjsonTypeParam<ConfigType>>
         kJsonSource.RemoveAllMembers();
     }
 
-    virtual void EmitDefault(rapidjson::Document*) = 0;
-    virtual void EmitOptional(rapidjson::Document*) = 0;
-    virtual void EmitMandatory(rapidjson::Document*) = 0;
+    virtual void EmitDefault(rapidjson::Document*) override = 0;
+    virtual void EmitOptional(rapidjson::Document*) override = 0;
+    virtual void EmitMandatory(rapidjson::Document*) override = 0;
 
     virtual void EmitAll(rapidjson::Document* dst) override
     {

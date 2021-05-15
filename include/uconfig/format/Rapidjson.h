@@ -66,8 +66,8 @@ public:
      * @param[in] path JSON-path to the value.
      * @param[in] value Value to emit.
      */
-    template <typename ValueT>
-    void Emit(dest_type* dest, const std::string& path, const ValueT& value) const;
+    template <typename T>
+    void Emit(dest_type* dest, const std::string& path, const T& value) const;
 
     /**
      * Construct JSON-path to a array element at @p index.
@@ -88,42 +88,50 @@ private:
     /// Convert JSON-value @p source into a std::string.
     template <typename T, typename std::enable_if<std::is_same<T, std::string>::value>::type* = nullptr>
     static bool Convert(const json_value_type& source, T& result);
-
     /// Convert JSON-value @p source into a bool.
     template <typename T, typename std::enable_if<std::is_same<T, bool>::value>::type* = nullptr>
     static bool Convert(const json_value_type& source, T& result);
-
     /// Convert JSON-value @p source into a int.
     template <typename T, typename std::enable_if<std::is_same<T, int>::value>::type* = nullptr>
     static bool Convert(const json_value_type& source, T& result);
-
-    /// Convert JSON-value @p source into a int64_t.
-    template <typename T, typename std::enable_if<std::is_same<T, int64_t>::value>::type* = nullptr>
+    /// Convert JSON-value @p source into a long.
+    template <typename T, typename std::enable_if<std::is_same<T, long>::value>::type* = nullptr>
     static bool Convert(const json_value_type& source, T& result);
-
+    /// Convert JSON-value @p source into a long long.
+    template <typename T, typename std::enable_if<std::is_same<T, long long>::value>::type* = nullptr>
+    static bool Convert(const json_value_type& source, T& result);
     /// Convert JSON-value @p source into a unsigned.
     template <typename T, typename std::enable_if<std::is_same<T, unsigned>::value>::type* = nullptr>
     static bool Convert(const json_value_type& source, T& result);
-
-    /// Convert JSON-value @p source into a uint64_t.
-    template <typename T, typename std::enable_if<std::is_same<T, uint64_t>::value>::type* = nullptr>
+    /// Convert JSON-value @p source into a unsigned long.
+    template <typename T, typename std::enable_if<std::is_same<T, unsigned long>::value>::type* = nullptr>
     static bool Convert(const json_value_type& source, T& result);
-
+    /// Convert JSON-value @p source into a unsigned long long.
+    template <typename T, typename std::enable_if<std::is_same<T, unsigned long long>::value>::type* = nullptr>
+    static bool Convert(const json_value_type& source, T& result);
     /// Convert JSON-value @p source into a double.
     template <typename T, typename std::enable_if<std::is_same<T, double>::value>::type* = nullptr>
     static bool Convert(const json_value_type& source, T& result);
-
     /// Convert JSON-value @p source into a float.
     template <typename T, typename std::enable_if<std::is_same<T, float>::value>::type* = nullptr>
     static bool Convert(const json_value_type& source, T& result);
 
     // Helper to make a JSON-value from SrcT.
-    template <typename SrcT, typename std::enable_if<!std::is_same<SrcT, std::string>::value>::type* = nullptr>
-    static json_value_type MakeJson(const SrcT& source, allocator_type& allocator);
-
+    template <typename SrcT, typename std::enable_if<
+                                 std::is_same<SrcT, bool>::value || std::is_same<SrcT, int>::value ||
+                                 std::is_same<SrcT, long long>::value || std::is_same<SrcT, unsigned>::value ||
+                                 std::is_same<SrcT, unsigned long long>::value || std::is_same<SrcT, double>::value ||
+                                 std::is_same<SrcT, float>::value>::type* = nullptr>
+    static json_value_type MakeJson(const SrcT& source, allocator_type& alloc);
+    // Helper to make a JSON-value from SrcT.
+    template <typename SrcT, typename std::enable_if<std::is_same<SrcT, long>::value>::type* = nullptr>
+    static json_value_type MakeJson(const SrcT& source, allocator_type& alloc);
+    // Helper to make a JSON-value from SrcT.
+    template <typename SrcT, typename std::enable_if<std::is_same<SrcT, unsigned long>::value>::type* = nullptr>
+    static json_value_type MakeJson(const SrcT& source, allocator_type& alloc);
     // Helper to make a JSON-value from SrcT.
     template <typename SrcT, typename std::enable_if<std::is_same<SrcT, std::string>::value>::type* = nullptr>
-    static json_value_type MakeJson(const SrcT& source, allocator_type& allocator);
+    static json_value_type MakeJson(const SrcT& source, allocator_type& alloc);
 };
 
 } // namespace uconfig

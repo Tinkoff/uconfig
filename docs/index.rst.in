@@ -1,0 +1,20 @@
+@PROJECT_NAME@
+==========
+
+.. image:: https://img.shields.io/badge/language-c++[=cppStandart]-blue.svg
+  :alt: Language C++17
+  :target: https://isocpp.org
+
+.. image:: https://img.shields.io/badge/repo-@PROJECT_BADGE_NAME@-@PROJECT_BADGE_COLOR@.svg?logo=github
+  :alt: Gitlab repository
+  :target: @UCONFIG_REPOSITORY_URL@
+
+@PROJECT_DESCRIPTION@.
+
+.. toctree::
+   :maxdepth: 2
+
+   @EXHALE_REL_OUTPUT_DIR@/unabridged_api
+   @EXHALE_REL_OUTPUT_DIR@/class_view_hierarchy
+   @EXHALE_REL_OUTPUT_DIR@/file_view_hierarchy
+   genindex

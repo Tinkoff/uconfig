@@ -25,13 +25,12 @@ public:
      *
      * @tparam T Type to parse.
      *
-     * @param[in] source Not used.
      * @param[in] path Name of the value.
      *
      * @returns Value wrapped in std::optional or std::nullopt.
      */
     template <typename T>
-    std::optional<T> Parse(const source_type*, const std::string& path) const;
+    std::optional<T> Parse(const source_type* /*unused*/, const std::string& path) const;
 
     /**
      * Emit the (@p path, @p value) pair into @p dest.
@@ -42,8 +41,8 @@ public:
      * @param[in] path Key to emplace in the map.
      * @param[in] value Value to emit.
      */
-    template <typename ValueT>
-    void Emit(dest_type* dest, const std::string& path, const ValueT& value) const;
+    template <typename T>
+    void Emit(dest_type* dest, const std::string& path, const T& value) const;
 
     /**
      * Construct array element name using '_' as delimiter.

@@ -208,9 +208,9 @@ bool VariableIface<T, Format>::Optional() const noexcept
 }
 
 template <typename T, typename Format>
-VectorIface<T, Format>::VectorIface(const std::string& vector_path, Vector<T>* list)
+VectorIface<T, Format>::VectorIface(const std::string& vector_path, Vector<T>* vector)
     : path_(vector_path)
-    , vector_ptr_(list)
+    , vector_ptr_(vector)
 {
     if (!vector_ptr_) {
         throw std::runtime_error("invalid list pointer to parse");
