@@ -1,13 +1,25 @@
 @PROJECT_NAME@
 ==========
 
-.. image:: https://img.shields.io/badge/language-c++[=cppStandart]-blue.svg
+.. image:: https://img.shields.io/badge/language-c++-blue.svg?logo=c%2B%2B
   :alt: Language C++17
   :target: https://isocpp.org
 
-.. image:: https://img.shields.io/badge/repo-@PROJECT_BADGE_NAME@-@PROJECT_BADGE_COLOR@.svg?logo=github
-  :alt: Gitlab repository
-  :target: @UCONFIG_REPOSITORY_URL@
+.. image:: https://img.shields.io/github/release/TinkoffCreditSystems/uconfig.svg
+  :alt: Gitlab releases
+  :target: @UCONFIG_REPOSITORY_URL@/releases
+
+.. image:: https://coveralls.io/repos/github/TinkoffCreditSystems/uconfig/badge.svg?branch=develop
+  :alt: Coverage status
+  :target: https://coveralls.io/github/TinkoffCreditSystems/uconfig?branch=develop
+
+.. image:: https://img.shields.io/badge/Conan-package-blueviolet
+  :alt: Conan package
+  :target: https://conan.io/center/tcsbank-uconfig
+
+.. image:: https://img.shields.io/github/license/TinkoffCreditSystems/uconfig.svg
+  :alt: License
+  :target: https://www.apache.org/licenses/LICENSE-2.0
 
 @PROJECT_DESCRIPTION@.
 
