@@ -121,6 +121,8 @@ JSON formatter uses [JSON-pointer](https://tools.ietf.org/html/rfc6901) as names
 
 ## Detailed description
 
+Below are the tips on how-to-use some primitives from this library. For full API reference look here – https://tinkoffcreditsystems.github.io/uconfig/
+
 ### Configuration elements
 
 All configuration elements (children) should be derived from `uconfig::Object` class, to achieve it just:
