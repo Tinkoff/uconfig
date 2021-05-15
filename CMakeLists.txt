@@ -42,7 +42,6 @@ option(UCONFIG_BUILD_DOCS "Build sphinx generated docs" OFF)
 # Create target and set properties
 
 set(UCONFIG_INC_DIR ${CMAKE_CURRENT_SOURCE_DIR}/include)
-set(UCONFIG_SRC_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src)
 
 add_library(${PROJECT_NAME} INTERFACE)
 add_library(${PROJECT_NAME}::${PROJECT_NAME} ALIAS ${PROJECT_NAME})

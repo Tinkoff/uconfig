@@ -30,7 +30,7 @@ public:
      * @returns Value wrapped in std::optional or std::nullopt.
      */
     template <typename T>
-    std::optional<T> Parse(const source_type*, const std::string& path) const;
+    std::optional<T> Parse(const source_type* /*unused*/, const std::string& path) const;
 
     /**
      * Emit the (@p path, @p value) pair into @p dest.

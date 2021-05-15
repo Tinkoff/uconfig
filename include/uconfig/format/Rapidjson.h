@@ -117,23 +117,21 @@ private:
     static bool Convert(const json_value_type& source, T& result);
 
     // Helper to make a JSON-value from SrcT.
-    template <typename SrcT, typename std::enable_if<std::is_same<SrcT, bool>::value ||
-                                                     std::is_same<SrcT, int>::value ||
-                                                     std::is_same<SrcT, long long>::value ||
-                                                     std::is_same<SrcT, unsigned>::value ||
-                                                     std::is_same<SrcT, unsigned long long>::value ||
-                                                     std::is_same<SrcT, double>::value ||
-                                                     std::is_same<SrcT, float>::value>::type* = nullptr>
-    static json_value_type MakeJson(const SrcT& source, allocator_type& allocator);
+    template <typename SrcT, typename std::enable_if<
+                                 std::is_same<SrcT, bool>::value || std::is_same<SrcT, int>::value ||
+                                 std::is_same<SrcT, long long>::value || std::is_same<SrcT, unsigned>::value ||
+                                 std::is_same<SrcT, unsigned long long>::value || std::is_same<SrcT, double>::value ||
+                                 std::is_same<SrcT, float>::value>::type* = nullptr>
+    static json_value_type MakeJson(const SrcT& source, allocator_type& alloc);
     // Helper to make a JSON-value from SrcT.
     template <typename SrcT, typename std::enable_if<std::is_same<SrcT, long>::value>::type* = nullptr>
-    static json_value_type MakeJson(const SrcT& source, allocator_type& allocator);
+    static json_value_type MakeJson(const SrcT& source, allocator_type& alloc);
     // Helper to make a JSON-value from SrcT.
     template <typename SrcT, typename std::enable_if<std::is_same<SrcT, unsigned long>::value>::type* = nullptr>
-    static json_value_type MakeJson(const SrcT& source, allocator_type& allocator);
+    static json_value_type MakeJson(const SrcT& source, allocator_type& alloc);
     // Helper to make a JSON-value from SrcT.
     template <typename SrcT, typename std::enable_if<std::is_same<SrcT, std::string>::value>::type* = nullptr>
-    static json_value_type MakeJson(const SrcT& source, allocator_type& allocator);
+    static json_value_type MakeJson(const SrcT& source, allocator_type& alloc);
 };
 
 } // namespace uconfig

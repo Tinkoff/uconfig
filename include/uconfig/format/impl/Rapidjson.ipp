@@ -171,13 +171,11 @@ bool RapidjsonFormat<AllocatorT>::Convert(const json_value_type& source, T& resu
 }
 
 template <typename AllocatorT>
-template <typename SrcT, typename std::enable_if<std::is_same<SrcT, bool>::value ||
-                                                 std::is_same<SrcT, int>::value ||
-                                                 std::is_same<SrcT, long long>::value ||
-                                                 std::is_same<SrcT, unsigned>::value ||
-                                                 std::is_same<SrcT, unsigned long long>::value ||
-                                                 std::is_same<SrcT, double>::value ||
-                                                 std::is_same<SrcT, float>::value>::type*>
+template <typename SrcT,
+          typename std::enable_if<std::is_same<SrcT, bool>::value || std::is_same<SrcT, int>::value ||
+                                  std::is_same<SrcT, long long>::value || std::is_same<SrcT, unsigned>::value ||
+                                  std::is_same<SrcT, unsigned long long>::value || std::is_same<SrcT, double>::value ||
+                                  std::is_same<SrcT, float>::value>::type*>
 typename RapidjsonFormat<AllocatorT>::json_value_type RapidjsonFormat<AllocatorT>::MakeJson(const SrcT& source,
                                                                                             allocator_type& /*alloc*/)
 {
