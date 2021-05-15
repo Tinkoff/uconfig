@@ -10,8 +10,8 @@ class Pkg(ConanFile):
     description = "C++ library to parse and emit multi-format configuration for your app"
     topics = ("configuration")
 
-    options = {"testing": [True, False]}
-    default_options = {"testing": False}
+    options = {"testing": [True, False], "docs": [True, False]}
+    default_options = {"testing": False, "docs": False}
 
     generators = "cmake_find_package"
     exports_sources = "include/*", "CMakeLists.txt", "uconfigConfig.cmake.in"
@@ -19,6 +19,7 @@ class Pkg(ConanFile):
     def _configure_cmake(self):
         cmake = CMake(self)
         cmake.definitions["BUILD_TESTING"] = "ON" if self.options.testing else "OFF"
+        cmake.definitions["BUILD_DOCS"] = "ON" if self.options.docs else "OFF"
         cmake.configure()
 
         return cmake

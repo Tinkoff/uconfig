@@ -46,7 +46,7 @@ public:
 /**
  * Configuration object.
  *
- * @tparam Format Type of the formatter to parse/emit.
+ * @tparam FormatTs Types of the formatter to parse/emit.
  */
 template <typename... FormatTs>
 class Config: public Object
@@ -80,6 +80,8 @@ public:
     /**
      * Parse the config at @p path from @p source using @p parser.
      *
+     * @tparam F Type of the parser to use. Should be one of FormatTs.
+     *
      * @param[in] parser Parser instance to use.
      * @param[in] path Path where the config resides in @p source.
      * @param[in] source Source to parse from.
@@ -95,6 +97,8 @@ public:
 
     /**
      * Emit the config at @p path to @p destination using @p emitter.
+     *
+     * @tparam F Type of the emitter to use. Should be one of FormatTs.
      *
      * @param[in] emitter Emitter instance to use.
      * @param[in] path Path where the config should be in @p destination.
@@ -127,8 +131,6 @@ protected:
      *  in the config with respected paths. To register a variable call Register().
      *
      * @param[in] config_path Path of this config for the Format.
-     *
-     * @returns true if it has, false otherwise.
      */
     virtual void Init(const std::string& config_path) = 0;
 
@@ -136,13 +138,12 @@ protected:
      * Register a child for this config.
      * This function should be called for all children of the config to get them parsed/emitted.
      *
-     * @tparam T Type of element to register. T should be either `uconfig::Variable,
-     *  uconfig::Vector or another uconfig::Config.
+     * @tparam F Type of the format to register for.
+     * @tparam T Type of element to register. Should be either uconfig::Variable,
+     *  uconfig::Vector or derivative of uconfig::Config.
      *
      * @param[in] element_path Path of the child.
      * @param[in] element Pointer to the child.
-     *
-     * @returns true if it has, false otherwise.
      */
     template <typename F, typename T>
     void Register(const std::string& element_path, T* element) noexcept;
@@ -154,7 +155,7 @@ private:
     template <typename F>
     void SetFormat() noexcept;
 
-    /// Get all registered children interfaces for specified format @F.
+    /// Get all registered children interfaces for specified format.
     template <typename F>
     std::vector<std::unique_ptr<Interface<F>>>& Interfaces() noexcept;
 
@@ -277,6 +278,7 @@ public:
      */
     explicit operator const T&() const;
 
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
     /* enable left and right-handed comparisons */
 
     template <typename V, typename U>
@@ -312,6 +314,8 @@ public:
     friend bool operator<=(const U& lhs, const Variable<V>& rhs);
     template <typename V, typename U>
     friend bool operator<=(const Variable<V>& lhs, const U& rhs);
+
+#endif /* DOXYGEN_SHOULD_SKIP_THIS */
 
 protected:
     bool optional_ = false;
@@ -378,9 +382,13 @@ public:
      */
     const T& operator[](std::size_t pos) const;
 
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
+
     // operator== for Vector<Variable<V>> and std::vector<V>.
     template <typename V>
     friend bool operator==(const Vector<Variable<V>>& lhs, const std::vector<V>& rhs);
+
+#endif /* DOXYGEN_SHOULD_SKIP_THIS */
 };
 
 } // namespace uconfig

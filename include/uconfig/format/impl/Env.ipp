@@ -16,10 +16,10 @@ std::optional<T> EnvFormat::Parse(const source_type*, const std::string& path) c
     return FromString<T>(env_var);
 }
 
-template <typename ValueT>
-void EnvFormat::Emit(dest_type* dest, const std::string& path, const ValueT& value) const
+template <typename T>
+void EnvFormat::Emit(dest_type* dest, const std::string& path, const T& value) const
 {
-    dest->emplace(std::make_pair(path, ToString<ValueT>(value)));
+    dest->emplace(std::make_pair(path, ToString<T>(value)));
 }
 
 std::string EnvFormat::VectorElementPath(const std::string& vector_path, std::size_t index) const noexcept

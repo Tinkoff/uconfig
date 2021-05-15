@@ -4,6 +4,7 @@
 
 #include <utility>
 
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
 namespace uconfig {
 namespace detail {
 
@@ -39,5 +40,6 @@ using deduce_iface_t = typename deduce_iface<T, F>::type;
 
 } // namespace detail
 } // namespace uconfig
+#endif /* DOXYGEN_SHOULD_SKIP_THIS */
 
 #include "forward_detail.h"

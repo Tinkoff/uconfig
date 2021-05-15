@@ -23,6 +23,7 @@ It requires c++17 compatible compiler and [Rapidjson](https://rapidjson.org/) if
     * [Custom formats](#custom-formats)
     * [Custom types](#custom-types)
     * [Value validation](#value-validation)
+* [How to use in your project](#how-to-use-in-your-project)
 * [How to build](#how-to-build)
 
 ## Quickstart
@@ -528,29 +529,55 @@ struct EvenInteger: public uconfig::Variable<int>
 };
 ```
 
+## How to use in your project
+
+Generally, to use this library you need to tell your compiler where to lookup for its' headers. For gcc/clang it can be done via `-I` flag. Any particular situation depends on what you are using to build your project.
+
+### Use installed
+
+Easiest way is to install this library onto your system. To do so, execute these commands from `uconfig` folder (sudo may be required):
+
+```bash
+cmake -H. -Bbuild -DUCONFIG_BUILD_TESTING=OFF -DUCONFIG_BUILD_DOCS=OFF
+cmake --build ./build --target install
+```
+
+This will put uconfig headers into system default folder. From there you should be able to use it like any other library (`#include <uconfig/uconfig.h>` and so on).
+
+### Manually
+
+If you [have installed](#use-installed) uconfig then you don't need to do anything (probably), just `#include`. If you don't want to install, just pass an `-I` flag with path to uconfig include folder. For example, if you cloned it into `~/uconfig/`, then use `-I~/uconfig/include` when calling for gcc/clang.
+
+### Cmake
+
+If you [have installed](#use-installed) uconfig then use `find_package(uconfig REQUIRED)` and `target_link_libraries(<your target> uconfig::uconfig)` to make sure it was found properly. Alternatively, you can use cmake's [`add_subdirectory`](https://cmake.org/cmake/help/latest/command/add_subdirectory.html), [`ExternalProject`](https://cmake.org/cmake/help/latest/module/ExternalProject.html), [`FetchContent`](https://cmake.org/cmake/help/latest/module/FetchContent.html) to bring it and include in configure stage of you project.
+
+Also, this may be helpful - https://cliutils.gitlab.io/modern-cmake/
+
 ## How to build
 
 This library is header-only, building required only for unit-tests. Prefer [out-of-source](https://gitlab.kitware.com/cmake/community/-/wikis/FAQ#what-is-an-out-of-source-build) building:
 
-To install:
-```bash
-mkdir build
-cd build
-cmake ..
-make install
-```
-
 To test:
 ```bash
-cmake -DCMAKE_BUILD_TYPE=Debug -DBUILD_TESTING=ON ..
-make -j$(nproc)
-ctest -S
+cmake -H. -Bbuild -DUCONFIG_BUILD_TESTING=ON
+cmake --build ./build
+cmake -E chdir ./build ctest --output-on-failure
 ```
+
+To install (sudo may be required):
+```bash
+cmake -H. -Bbuild -DUCONFIG_BUILD_TESTING=OFF -DUCONFIG_BUILD_DOCS=OFF
+cmake --build ./build --target install
+```
+
+*All these commands assume you are in uconfig root folder*
 
 ### Cmake options
 
 * **CMAKE_BUILD_TYPE** - [build type](https://cmake.org/cmake/help/latest/variable/CMAKE_BUILD_TYPE.html). `RelWithDebInfo` by default.
 * **UCONFIG_BUILD_TESTING** - build included unit-tests. `OFF` by default.
+* **UCONFIG_BUILD_DOCS** - build html (sphinx) reference docs. `OFF` by default.
 
 ## License
 
