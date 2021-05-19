@@ -1,3 +1,12 @@
+## 2.0.4 (2021-05-19)
+
+### Bug Fixes
+* Fix ODR violations
+* Fix macOS building
+
+### Misc
+* Improve docstrings
+
 ## 2.0.3 (2021-05-01)
 
 ### Misc
