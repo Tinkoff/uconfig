@@ -118,6 +118,7 @@ TYPED_TEST_P(Format, ParseNoValuesEmit)
     auto config = Format<TypeParam>::context->Config();
     auto* source = Format<TypeParam>::context->Source();
 
+    ASSERT_FALSE(config.Initialized());
     ASSERT_THROW(config.Parse(formatter, "", source), uconfig::ParseError);
     ASSERT_FALSE(config.Parse(formatter, "", source, false));
 
@@ -144,6 +145,7 @@ TYPED_TEST_P(Format, ParseNoMandatoryEmit)
     auto* source = Format<TypeParam>::context->Source();
     Format<TypeParam>::context->SetOptional(source);
 
+    ASSERT_FALSE(config.Initialized());
     ASSERT_TRUE(config.Parse(formatter, "", source, false));
 
     ASSERT_FALSE(config.Initialized());
@@ -169,6 +171,7 @@ TYPED_TEST_P(Format, ParseOnlyMandatoryEmit)
     auto* source = Format<TypeParam>::context->Source();
     Format<TypeParam>::context->SetMandatory(source);
 
+    ASSERT_FALSE(config.Initialized());
     ASSERT_TRUE(config.Parse(formatter, "", source));
 
     ASSERT_TRUE(config.Initialized());
@@ -195,6 +198,7 @@ TYPED_TEST_P(Format, ParseAllEmit)
     auto* source = Format<TypeParam>::context->Source();
     Format<TypeParam>::context->SetAll(source);
 
+    ASSERT_FALSE(config.Initialized());
     ASSERT_TRUE(config.Parse(formatter, "", source));
 
     ASSERT_TRUE(config.Initialized());
