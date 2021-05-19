@@ -248,8 +248,12 @@
 <span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span><span class="p">...</span> <span class="n">FormatTs</span><span class="o">&gt;</span>
 <span class="kt">bool</span> <span class="n">Config</span><span class="o">&lt;</span><span class="n">FormatTs</span><span class="p">...</span><span class="o">&gt;::</span><span class="n">Initialized</span><span class="p">()</span> <span class="k">const</span> <span class="k">noexcept</span>
 <span class="p">{</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">elements_</span><span class="p">.</span><span class="n">empty</span><span class="p">())</span> <span class="p">{</span>
+        <span class="c1">// Populate elements_ if they are not</span>
+        <span class="k">const_cast</span><span class="o">&lt;</span><span class="n">Config</span><span class="o">&lt;</span><span class="n">FormatTs</span><span class="p">...</span><span class="o">&gt;*&gt;</span><span class="p">(</span><span class="k">this</span><span class="p">)</span><span class="o">-&gt;</span><span class="n">Init</span><span class="p">(</span><span class="s">""</span><span class="p">);</span>
+    <span class="p">}</span>
     <span class="k">for</span> <span class="p">(</span><span class="k">const</span> <span class="k">auto</span><span class="o">*</span> <span class="nl">elem</span> <span class="p">:</span> <span class="n">elements_</span><span class="p">)</span> <span class="p">{</span>
-        <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">elem</span><span class="o">-&gt;</span><span class="n">Initialized</span><span class="p">()</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="n">elem</span><span class="o">-&gt;</span><span class="n">Optional</span><span class="p">())</span> <span class="p">{</span>
+        <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">elem</span><span class="o">-&gt;</span><span class="n">Optional</span><span class="p">()</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="n">elem</span><span class="o">-&gt;</span><span class="n">Initialized</span><span class="p">())</span> <span class="p">{</span>
             <span class="k">return</span> <span class="nb">false</span><span class="p">;</span>
         <span class="p">}</span>
     <span class="p">}</span>
@@ -266,15 +270,14 @@
 <span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span> <span class="n">F</span><span class="p">,</span> <span class="k">typename</span> <span class="n">T</span><span class="o">&gt;</span>
 <span class="kt">void</span> <span class="n">Config</span><span class="o">&lt;</span><span class="n">FormatTs</span><span class="p">...</span><span class="o">&gt;::</span><span class="n">Register</span><span class="p">(</span><span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&amp;</span> <span class="n">element_path</span><span class="p">,</span> <span class="n">T</span><span class="o">*</span> <span class="n">element</span><span class="p">)</span> <span class="k">noexcept</span>
 <span class="p">{</span>
-    <span class="k">using</span> <span class="n">elem_iface_type</span> <span class="o">=</span> <span class="k">typename</span> <span class="n">T</span><span class="o">::</span><span class="k">template</span> <span class="n">iface_type</span><span class="o">&lt;</span><span class="n">F</span><span class="o">&gt;</span><span class="p">;</span>
-
-    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">register_formats_</span><span class="p">.</span><span class="n">count</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">type_index</span><span class="p">(</span><span class="k">typeid</span><span class="p">(</span><span class="n">F</span><span class="p">))))</span> <span class="p">{</span>
-        <span class="k">return</span><span class="p">;</span>
-    <span class="p">}</span>
-
-    <span class="k">auto</span><span class="o">&amp;</span> <span class="n">fmt_ifaces</span> <span class="o">=</span> <span class="n">Interfaces</span><span class="o">&lt;</span><span class="n">F</span><span class="o">&gt;</span><span class="p">();</span>
-    <span class="n">fmt_ifaces</span><span class="p">.</span><span class="n">emplace_back</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">make_unique</span><span class="o">&lt;</span><span class="n">elem_iface_type</span><span class="o">&gt;</span><span class="p">(</span><span class="n">element_path</span><span class="p">,</span> <span class="n">element</span><span class="p">));</span>
     <span class="n">elements_</span><span class="p">.</span><span class="n">insert</span><span class="p">(</span><span class="n">element</span><span class="p">);</span>
+
+    <span class="k">if</span> <span class="p">(</span><span class="n">register_formats_</span><span class="p">.</span><span class="n">count</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">type_index</span><span class="p">(</span><span class="k">typeid</span><span class="p">(</span><span class="n">F</span><span class="p">))))</span> <span class="p">{</span>
+        <span class="k">using</span> <span class="n">elem_iface_type</span> <span class="o">=</span> <span class="k">typename</span> <span class="n">T</span><span class="o">::</span><span class="k">template</span> <span class="n">iface_type</span><span class="o">&lt;</span><span class="n">F</span><span class="o">&gt;</span><span class="p">;</span>
+
+        <span class="k">auto</span><span class="o">&amp;</span> <span class="n">fmt_ifaces</span> <span class="o">=</span> <span class="n">Interfaces</span><span class="o">&lt;</span><span class="n">F</span><span class="o">&gt;</span><span class="p">();</span>
+        <span class="n">fmt_ifaces</span><span class="p">.</span><span class="n">emplace_back</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">make_unique</span><span class="o">&lt;</span><span class="n">elem_iface_type</span><span class="o">&gt;</span><span class="p">(</span><span class="n">element_path</span><span class="p">,</span> <span class="n">element</span><span class="p">));</span>
+    <span class="p">}</span>
 <span class="p">}</span>
 
 <span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span><span class="p">...</span> <span class="n">FormatTs</span><span class="o">&gt;</span>

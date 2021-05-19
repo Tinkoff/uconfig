@@ -73,8 +73,12 @@ Program Listing for File Objects.ipp
    template <typename... FormatTs>
    bool Config<FormatTs...>::Initialized() const noexcept
    {
+       if (elements_.empty()) {
+           // Populate elements_ if they are not
+           const_cast<Config<FormatTs...>*>(this)->Init("");
+       }
        for (const auto* elem : elements_) {
-           if (!elem->Initialized() && !elem->Optional()) {
+           if (!elem->Optional() && !elem->Initialized()) {
                return false;
            }
        }
@@ -91,15 +95,14 @@ Program Listing for File Objects.ipp
    template <typename F, typename T>
    void Config<FormatTs...>::Register(const std::string& element_path, T* element) noexcept
    {
-       using elem_iface_type = typename T::template iface_type<F>;
-   
-       if (!register_formats_.count(std::type_index(typeid(F)))) {
-           return;
-       }
-   
-       auto& fmt_ifaces = Interfaces<F>();
-       fmt_ifaces.emplace_back(std::make_unique<elem_iface_type>(element_path, element));
        elements_.insert(element);
+   
+       if (register_formats_.count(std::type_index(typeid(F)))) {
+           using elem_iface_type = typename T::template iface_type<F>;
+   
+           auto& fmt_ifaces = Interfaces<F>();
+           fmt_ifaces.emplace_back(std::make_unique<elem_iface_type>(element_path, element));
+       }
    }
    
    template <typename... FormatTs>
