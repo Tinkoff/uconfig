@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.0 FATAL_ERROR)
 
 set(UCONFIG_VERSION_MAJOR "2")
 set(UCONFIG_VERSION_MINOR "0")
-set(UCONFIG_VERSION_RELEASE "3")
+set(UCONFIG_VERSION_RELEASE "4")
 set(UCONFIG_SUMMARY "C++ library")
 set(UCONFIG_REPOSITORY_URL "https://github.com/TinkoffCreditSystems/uconfig")
 set(UCONFIG_LICENSE "${CMAKE_CURRENT_SOURCE_DIR}/LICENSE")
@@ -14,8 +14,8 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_CURRENT_SOURCE_DIR})
 
 ## Declare project
 project("uconfig" LANGUAGES CXX
-                       VERSION "${UCONFIG_VERSION_STRING}"
-                       DESCRIPTION "C++ library to parse and emit multi-format configuration for your app"
+                  VERSION "${UCONFIG_VERSION_STRING}"
+                  DESCRIPTION "C++ library to parse and emit multi-format configuration for your app"
 )
 
 ##############################################
@@ -116,6 +116,7 @@ if(UCONFIG_BUILD_TESTING)
 
     add_subdirectory(tests)
 endif()
+
 
 ##############################################
 # Docs

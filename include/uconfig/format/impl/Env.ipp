@@ -60,13 +60,13 @@ std::string EnvFormat::ToString(const T& value)
 }
 
 template <>
-std::optional<std::string> EnvFormat::FromString<std::string>(const std::string& str)
+inline std::optional<std::string> EnvFormat::FromString<std::string>(const std::string& str)
 {
     return str;
 }
 
 template <>
-std::string EnvFormat::ToString<std::string>(const std::string& value)
+inline std::string EnvFormat::ToString<std::string>(const std::string& value)
 {
     return value;
 }
