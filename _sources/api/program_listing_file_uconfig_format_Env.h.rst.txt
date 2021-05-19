@@ -31,7 +31,7 @@ Program Listing for File Env.h
        template <typename T>
        void Emit(dest_type* dest, const std::string& path, const T& value) const;
    
-       virtual std::string VectorElementPath(const std::string& vector_path, std::size_t index) const noexcept override;
+       inline virtual std::string VectorElementPath(const std::string& vector_path, std::size_t index) const noexcept override;
    
    private:
        template <typename T>

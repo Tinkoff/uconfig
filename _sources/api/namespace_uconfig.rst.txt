@@ -71,9 +71,9 @@ Functions
 
 - :ref:`exhale_function_namespaceuconfig_1a9690e44d1d1976484a7803650e17c2f5`
 
-- :ref:`exhale_function_namespaceuconfig_1a703cd3373f0ff99c70eebb358a20bb81`
-
 - :ref:`exhale_function_namespaceuconfig_1aa4c46099a19866c135bee248e4779d78`
+
+- :ref:`exhale_function_namespaceuconfig_1a703cd3373f0ff99c70eebb358a20bb81`
 
 - :ref:`exhale_function_namespaceuconfig_1a2595ddcc2bcefbe9be7f13fbbfe7a775`
 
