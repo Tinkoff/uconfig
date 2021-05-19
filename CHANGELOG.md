@@ -1,3 +1,9 @@
+# 2.1.0 (2021-05-19)
+
+### Features
+* Default-constructed Config isn't initialized if all its' children aren't
+
+
 ## 2.0.4 (2021-05-19)
 
 ### Bug Fixes
