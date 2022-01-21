@@ -121,7 +121,7 @@ JSON formatter uses [JSON-pointer](https://tools.ietf.org/html/rfc6901) as names
 
 ## Detailed description
 
-Below are the tips on how-to-use some primitives from this library. For full API reference look here – https://tinkoffcreditsystems.github.io/uconfig/
+Below are the tips on how-to-use some primitives from this library. For full API reference look here – https://tinkoff.github.io/uconfig/
 
 ### Configuration elements
 
