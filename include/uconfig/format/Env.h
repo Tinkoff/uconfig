@@ -53,7 +53,8 @@ public:
      * @returns '_' delimited name to the element at @p index, e.g. "ARRAY_0"
      *  for @p vector_path = "ARRAY" and @p index = 0.
      */
-    inline virtual std::string VectorElementPath(const std::string& vector_path, std::size_t index) const noexcept override;
+    inline virtual std::string VectorElementPath(const std::string& vector_path,
+                                                 std::size_t index) const noexcept override;
 
 private:
     /// Convert std::string to `T`.

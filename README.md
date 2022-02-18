@@ -2,7 +2,7 @@
 
 [![Language C++](https://img.shields.io/badge/language-c++-blue.svg?logo=c%2B%2B)](https://isocpp.org)
 [![Github releases](https://img.shields.io/github/release/TinkoffCreditSystems/uconfig.svg)](https://github.com/TinkoffCreditSystems/uconfig/releases)
-[![Coverage Status](https://coveralls.io/repos/github/TinkoffCreditSystems/uconfig/badge.svg?branch=develop)](https://coveralls.io/github/TinkoffCreditSystems/uconfig?branch=develop)
+[![Coverage Status](https://codecov.io/gh/Tinkoff/uconfig/branch/develop/graph/badge.svg?token=8QWBUJMX90)](https://codecov.io/gh/Tinkoff/uconfig)
 [![Conan Package](https://img.shields.io/badge/Conan-package-blueviolet)](https://conan.io/center/tcsbank-uconfig)
 [![License](https://img.shields.io/github/license/TinkoffCreditSystems/uconfig.svg)](./LICENSE)
 

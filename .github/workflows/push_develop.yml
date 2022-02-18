@@ -13,12 +13,12 @@ jobs:
     - name: Install dependencies on ubuntu
       run: |
         sudo apt-get update
-        sudo apt-get install -yq rapidjson-dev lcov
-    # Make and report coverage
+        sudo apt-get install -yq lcov rapidjson-dev
+    # Calculate coverage
     - name: Collect coverage
       run: .github/workflows/run.sh coverage
+    # Report coverage
     - name: Report coverage
-      uses: coverallsapp/github-action@master
+      uses: codecov/codecov-action@v2
       with:
-        path-to-lcov: coverage.info
-        github-token: ${{ secrets.GITHUB_TOKEN }}
+        files: ./coverage.info
